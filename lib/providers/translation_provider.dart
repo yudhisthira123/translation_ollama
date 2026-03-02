@@ -3,7 +3,8 @@ import 'package:ollama_dart/ollama_dart.dart';
 
 class TranslationProvider extends ChangeNotifier {
   final List<String> languages = ["English", "Hindi", "German"];
-  final client = OllamaClient(baseUrl: "http://192.168.2.37:11434/api");
+  // final client = OllamaClient(baseUrl: "http://192.168.2.37:11434/api");
+  final client = OllamaClient(baseUrl: "http://192.168.0.106:11434/api");
 
   String _sourceLanguage = "English";
   String _targetLanguage = "Hindi";
@@ -14,6 +15,7 @@ class TranslationProvider extends ChangeNotifier {
   String get sourceLanguage => _sourceLanguage;
   String get targetLanguage => _targetLanguage;
   String get translatedText => _translatedText;
+  String get inputText => _inputText;
 
   void setSourceLanguage(String value) {
     _sourceLanguage = value;
@@ -41,6 +43,7 @@ class TranslationProvider extends ChangeNotifier {
 
   void setInputText(String text) {
     _inputText = text;
+    notifyListeners();
   }
 
   Future<void> translate() async {

@@ -18,6 +18,9 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
   final TextEditingController messageController = TextEditingController();
   late stt.SpeechToText _speech;
   bool _isListening = false;
+  String _lastWords = "";
+  bool _speechEnabled = false;
+  bool _receivedFinalResult = false;
   final GlobalKey<TooltipState> _tooltipKey = GlobalKey<TooltipState>();
 
   bool _showHelperText = true;
@@ -47,34 +50,150 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
   void initState() {
     super.initState();
     _speech = stt.SpeechToText();
+
+    _speech.initialize(
+      onStatus: _onSpeechStatus,
+      onError: (error) {
+        print("Speech error: $error");
+        if (_isListening) _restartListening();
+      },
+    ).then((enabled) {
+      _speechEnabled = enabled;
+    });
+  }
+
+  void _onSpeechStatus(String status) {
+    print("Speech status: $status");
+
+    // if (status == "done" && _isListening) {
+    //   _speech.stop(); // important for Android
+    //   _restartListening();
+    // }
+    /// silence pause reached (pauseFor: 3 sec)
+    // if (status == "notListening" && _isListening) {
+    //   print("Stopped due to silence pause");
+    //   _stopListening(); // stop permanently
+    //   return;
+    // }
+
+    /// Android timeout (~10 sec)
+    if (status == "done" && _isListening) {
+      print("Restarting due to Android timeout");
+      _restartListening();
+    }
+  }
+
+  // void _restartListening() async {
+  //   if (!_isListening) return;
+  //
+  //   await _speech.stop();
+  //
+  //   await Future.delayed(const Duration(milliseconds: 300));
+  //
+  //   if (_isListening) {
+  //     print("Restarting listening...");
+  //     _startListening();
+  //   }
+  // }
+
+  void _restartListening() async {
+    if (!_isListening || !_speechEnabled) return;
+
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    if (!_isListening) return;
+
+    print("Restarting listening...");
+
+    _speech.listen(
+      onResult: (val) {
+        final text = val.recognizedWords;
+
+        if (val.finalResult) {
+          _receivedFinalResult = true;
+
+          _lastWords = "$_lastWords ${val.recognizedWords}".trim();
+        }
+
+        final fullText = val.finalResult
+            ? _lastWords
+            : "$_lastWords ${val.recognizedWords}".trim();
+
+
+        setState(() {
+          messageController.text = fullText;
+          messageController.selection =
+              TextSelection.collapsed(offset: text.length);
+        });
+
+        widget.translationProvider.setInputText(fullText);
+      },
+      listenFor: const Duration(seconds: 30),
+      pauseFor: const Duration(seconds: 3),
+      listenOptions: stt.SpeechListenOptions(
+        partialResults: true,
+        listenMode: stt.ListenMode.dictation,
+        cancelOnError: false,
+      ),
+    );
   }
 
   void _startListening() async {
-    bool available = await _speech.initialize(
-      onStatus: (val) {
-        if (val == 'done') {
-          _stopListening();
-          // _sendMessage();
-        }
-      },
-      onError: (val) => print('onError: $val'),
-    );
+    // bool available = await _speech.initialize(
+    //   onStatus: (val) {
+    //     if (val == 'done') {
+    //       _stopListening();
+    //       // _sendMessage();
+    //     }
+    //   },
+    //   onError: (val) => print('onError: $val'),
+    // );
+    //
+    // if (available) {
 
-    if (available) {
-      setState(() => _isListening = true);
+    if (!_speech.isAvailable) {
+      print("Speech not available");
+      return;
+    }
+
+    // _lastWords = "";
+    if (!_isListening) {
+      _lastWords = messageController.text; // ✅ keep existing text
+    }
+
+    setState(() => _isListening = true);
       _speech.listen(
         onResult: (val) {
+          final text = val.recognizedWords;
+
+          if (val.finalResult) {
+            /// append only final confirmed words
+            _lastWords = "$_lastWords ${val.recognizedWords}".trim();
+          }
+
+          /// show live + previous words
+          final fullText = val.finalResult
+              ? _lastWords
+              : "$_lastWords ${val.recognizedWords}".trim();
+
           setState(() {
-            messageController.text = val.recognizedWords;
+            messageController.text = fullText;
             messageController.selection = TextSelection.fromPosition(
               TextPosition(offset: messageController.text.length),
             );
           });
+
+          widget.translationProvider.setInputText(fullText);
         },
-        listenFor: const Duration(seconds: 10),
-        pauseFor: const Duration(seconds: 2),
+        listenFor: const Duration(seconds: 30),
+        pauseFor: const Duration(seconds:5),
+        listenOptions: stt.SpeechListenOptions(
+          partialResults: true,
+          listenMode: stt.ListenMode.dictation,
+          cancelOnError: false,
+        ),
       );
-    }
+    // }
   }
 
   void _stopListening() {
@@ -151,6 +270,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
                       Expanded(
                         child: TextField(
                           controller: messageController,
+                          onChanged: widget.translationProvider.setInputText,
                           style: const TextStyle(color: Colors.white),
                           decoration: InputDecoration(
                             hintText: "Type a message...",
@@ -214,5 +334,12 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _speech.stop();
+    messageController.dispose();
+    super.dispose();
   }
 }

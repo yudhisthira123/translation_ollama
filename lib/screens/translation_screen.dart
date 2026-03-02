@@ -97,6 +97,30 @@ class TranslationScreen extends StatelessWidget {
                           ),
                     
                           const SizedBox(height: 20),
+                          /// SOURCE TEXT BOX (editable)
+                          Container(
+                            height: 200,
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              border: Border.all(),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: TextField(
+                              controller: TextEditingController(text: provider.inputText)
+                                ..selection = TextSelection.fromPosition(
+                                  TextPosition(offset: provider.inputText.length),
+                                ),
+                              maxLines: null,
+                              decoration: const InputDecoration(
+                                hintText: "Enter source text",
+                                border: InputBorder.none,
+                              ),
+                              onChanged: provider.setInputText,
+                            ),
+                          ),
+
+                          const SizedBox(height: 16),
                     
                           /// TRANSLATED TEXT BOX
                           Container(
@@ -107,38 +131,15 @@ class TranslationScreen extends StatelessWidget {
                               border: Border.all(),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Text(
-                              provider.translatedText.isEmpty
-                                  ? "Translated text appears here"
-                                  : provider.translatedText,
+                            child: SingleChildScrollView(
+                              child: Text(
+                                provider.translatedText.isEmpty
+                                    ? "Translated text appears here"
+                                    : provider.translatedText,
+                              ),
                             ),
                           ),
                     
-                          // const Spacer(),
-                          //
-                          // /// INPUT FIELD
-                          // ChatInputWidget(),
-                          // Row(
-                          //   children: [
-                          //     Expanded(
-                          //       child: TextField(
-                          //         decoration: const InputDecoration(
-                          //           hintText: "Enter text",
-                          //           border: OutlineInputBorder(),
-                          //         ),
-                          //         onChanged: provider.setInputText,
-                          //       ),
-                          //     ),
-                          //     IconButton(
-                          //       icon: const Icon(Icons.mic),
-                          //       onPressed: () {},
-                          //     ),
-                          //     IconButton(
-                          //       icon: const Icon(Icons.send),
-                          //       onPressed: provider.translate,
-                          //     ),
-                          //   ],
-                          // ),
                         ],
                       ),
                     ),
