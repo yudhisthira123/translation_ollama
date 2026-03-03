@@ -21,30 +21,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
   String _lastWords = "";
   bool _speechEnabled = false;
   bool _receivedFinalResult = false;
-  final GlobalKey<TooltipState> _tooltipKey = GlobalKey<TooltipState>();
 
-  bool _showHelperText = true;
-
-  void _onTap() {
-    final dynamic tooltip = _tooltipKey.currentState;
-
-    setState(() {
-      _showHelperText = false; // hide helper text
-    });
-
-    tooltip?.ensureTooltipVisible();
-
-    // Flutter hides tooltip automatically after Tooltip.waitDuration
-    Future.delayed(TooltipTheme.of(context).waitDuration ??
-        const Duration(seconds: 4))
-        .then((_) {
-      if (mounted) {
-        setState(() {
-          _showHelperText = true; // restore only after tooltip closes
-        });
-      }
-    });
-  }
 
   @override
   void initState() {
@@ -54,7 +31,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
     _speech.initialize(
       onStatus: _onSpeechStatus,
       onError: (error) {
-        print("Speech error: $error");
+        // print("Speech error: $error");
         if (_isListening) _restartListening();
       },
     ).then((enabled) {
@@ -63,7 +40,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
   }
 
   void _onSpeechStatus(String status) {
-    print("Speech status: $status");
+    // print("Speech status: $status");
 
     // if (status == "done" && _isListening) {
     //   _speech.stop(); // important for Android
@@ -78,7 +55,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
 
     /// Android timeout (~10 sec)
     if (status == "done" && _isListening) {
-      print("Restarting due to Android timeout");
+      // print("Restarting due to Android timeout");
       _restartListening();
     }
   }
@@ -103,7 +80,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
 
     if (!_isListening) return;
 
-    print("Restarting listening...");
+    // print("Restarting listening...");
 
     _speech.listen(
       onResult: (val) {
@@ -152,7 +129,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
     // if (available) {
 
     if (!_speech.isAvailable) {
-      print("Speech not available");
+      // print("Speech not available");
       return;
     }
 
@@ -205,6 +182,10 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
     final text = messageController.text.trim();
     if (text.isEmpty) return;
 
+    if (_isListening) {
+      _stopListening();
+    }
+
     widget.translationProvider.setInputText(text);
     widget.translationProvider.translate();
 
@@ -220,44 +201,6 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            GestureDetector(
-              onTap: _onTap,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  if (_showHelperText) ...[
-                    const SizedBox(width: 6),
-                    Flexible(
-                      child: Text(
-                        "Info Message",
-                        style: const TextStyle(color: Colors.white70),
-                        softWrap: true,
-                        overflow: TextOverflow.ellipsis, // or .fade if you prefer
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                  ],
-                  if(!_showHelperText)
-                    Spacer(),
-                  Tooltip(
-                    key: _tooltipKey,
-                    message:
-                    "AppStrings.infoMessage.tr(context)",
-                    textStyle: TextStyle(color: Colors.black), // text color
-                    decoration: BoxDecoration(
-                      color: Colors.white, // background color
-                      borderRadius: BorderRadius.circular(
-                        8,
-                      ),
-                      border: Border.all(color: Colors.black12), // optional border
-                    ),
-                    child: Icon(Icons.info_outline, color: Colors.white70),
-                  ),
-                  const SizedBox(width: 6),
-                ],
-              ),
-            ),
-            SizedBox(height: 5,),
             Container(
               width: 550,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -326,7 +269,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
                         ),
                     ],
                   ),
-                  Container(color: Colors.transparent, height: 10),
+                  Container(color: Colors.transparent, height: 5),
                 ],
               ),
             ),

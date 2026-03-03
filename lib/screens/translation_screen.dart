@@ -96,10 +96,22 @@ class TranslationScreen extends StatelessWidget {
                             ],
                           ),
                     
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              Text(
+                                "Source Text",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 5),
                           /// SOURCE TEXT BOX (editable)
                           Container(
-                            height: 200,
+                            height: 150,
                             width: double.infinity,
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
@@ -120,26 +132,79 @@ class TranslationScreen extends StatelessWidget {
                             ),
                           ),
 
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 10),
                     
                           /// TRANSLATED TEXT BOX
-                          Container(
-                            height: 200,
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              border: Border.all(),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: SingleChildScrollView(
-                              child: Text(
-                                provider.translatedText.isEmpty
-                                    ? "Translated text appears here"
-                                    : provider.translatedText,
+                          // Container(
+                          //   height: 200,
+                          //   width: double.infinity,
+                          //   padding: const EdgeInsets.all(12),
+                          //   decoration: BoxDecoration(
+                          //     border: Border.all(),
+                          //     borderRadius: BorderRadius.circular(8),
+                          //   ),
+                          //   child: SingleChildScrollView(
+                          //     child: Text(
+                          //       provider.translatedText.isEmpty
+                          //           ? "Translated text appears here"
+                          //           : provider.translatedText,
+                          //     ),
+                          //   ),
+                          // ),
+                          Row(
+                            children: [
+                              Text(
+                                "Translated Text",
+                                style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500
+                                ),
                               ),
-                            ),
+                            ],
                           ),
-                    
+                          const SizedBox(height: 8),
+
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Container(
+                                height: 150,
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  border: Border.all(),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: SingleChildScrollView(
+                                  child: Text(
+                                    provider.translatedText.isEmpty
+                                        ? "Translated text appears here"
+                                        : provider.translatedText,
+                                  ),
+                                ),
+                              ),
+
+                              const SizedBox(height: 4),
+
+                              IconButton(
+                                icon: Icon(
+                                  provider.isSpeaking
+                                      ? Icons.stop
+                                      : Icons.volume_up,
+                                ),
+                                onPressed: () async {
+                                  if (provider.isSpeaking) {
+                                    await provider.stop();
+                                  } else {
+                                    final text = provider.translatedText.isEmpty
+                                            ? "Translated text appears here"
+                                            : provider.translatedText;
+                                    await provider.speak(text);
+                                  }
+                                },
+                              )
+                            ],
+                          )
                         ],
                       ),
                     ),

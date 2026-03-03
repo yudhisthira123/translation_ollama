@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:ollama_dart/ollama_dart.dart';
 
 class TranslationProvider extends ChangeNotifier {
-  final List<String> languages = ["English", "Hindi", "German"];
+  // final List<String> languages = ["English", "Hindi", "German"];
+  final List<String> languages = ["English", "Hindi", "German","Spanish",
+    "French","Dutch","Russian","Portuguese","Japanese"];
   // final client = OllamaClient(baseUrl: "http://192.168.2.37:11434/api");
   final client = OllamaClient(baseUrl: "http://192.168.0.106:11434/api");
 
@@ -61,6 +64,42 @@ class TranslationProvider extends ChangeNotifier {
 
     print("translated text = $_translatedText");
 
+    notifyListeners();
+  }
+
+  final FlutterTts flutterTts = FlutterTts();
+  bool isSpeaking = false;
+
+  TranslationProvider() {
+    flutterTts.setCompletionHandler(() {
+      isSpeaking = false;
+      notifyListeners();
+    });
+
+    flutterTts.setCancelHandler(() {
+      isSpeaking = false;
+      notifyListeners();
+    });
+  }
+
+
+  Future<void> speak(String text) async {
+    if (text.isEmpty) return;
+
+    await flutterTts.setLanguage("en-US"); // change if needed
+    await flutterTts.setPitch(1.0);
+    await flutterTts.setSpeechRate(0.5);
+
+    isSpeaking = true;
+    notifyListeners();
+
+    await flutterTts.speak(text);
+  }
+
+  Future<void> stop() async {
+    await flutterTts.stop();
+
+    isSpeaking = false;
     notifyListeners();
   }
 }
