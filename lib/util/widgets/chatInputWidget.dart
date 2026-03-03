@@ -61,6 +61,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
 
     _speech.listen(
       onResult: (val) {
+        if (!_isListening) return;
         final text = val.recognizedWords;
 
         if (val.finalResult) {
@@ -111,6 +112,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
     setState(() => _isListening = true);
       _speech.listen(
         onResult: (val) {
+          if (!_isListening) return;
           final text = val.recognizedWords;
 
           if (val.finalResult) {
@@ -165,7 +167,11 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
     widget.translationProvider.setInputText(text);
     widget.translationProvider.translate();
 
-    messageController.clear();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      messageController.clear();
+      _lastWords = "";
+    });
     FocusScope.of(context).unfocus();
   }
 
