@@ -9,7 +9,7 @@ class TranslationProvider extends ChangeNotifier {
   final Map<String, String> languageCodes = {
     "English": "en",
     "Hindi": "hi-IN",
-    "German": "de",
+    "German": "de-DE",
     "Spanish": "es",
     "French": "fr",
     "Dutch": "nl",
