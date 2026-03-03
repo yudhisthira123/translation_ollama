@@ -6,8 +6,20 @@ class TranslationProvider extends ChangeNotifier {
   // final List<String> languages = ["English", "Hindi", "German"];
   final List<String> languages = ["English", "Hindi", "German","Spanish",
     "French","Dutch","Russian","Portuguese","Japanese"];
-  // final client = OllamaClient(baseUrl: "http://192.168.2.37:11434/api");
-  final client = OllamaClient(baseUrl: "http://192.168.0.106:11434/api");
+  final Map<String, String> languageCodes = {
+    "English": "en",
+    "Hindi": "hi-IN",
+    "German": "de",
+    "Spanish": "es",
+    "French": "fr",
+    "Dutch": "nl",
+    "Russian": "ru",
+    "Portuguese": "pt",
+    "Japanese": "ja"
+  };
+
+  final client = OllamaClient(baseUrl: "http://192.168.2.37:11434/api");
+  // final client = OllamaClient(baseUrl: "http://192.168.0.106:11434/api");
   // final ai_model = "llama3.2";
   final ai_model = "translategemma:latest";
 
@@ -26,10 +38,10 @@ class TranslationProvider extends ChangeNotifier {
     _sourceLanguage = value;
 
     /// auto fix if same
-    if (_sourceLanguage == _targetLanguage) {
-      _targetLanguage =
-          languages.firstWhere((e) => e != _sourceLanguage);
-    }
+    // if (_sourceLanguage == _targetLanguage) {
+    //   _targetLanguage =
+    //       languages.firstWhere((e) => e != _sourceLanguage);
+    // }
 
     notifyListeners();
   }
@@ -38,10 +50,10 @@ class TranslationProvider extends ChangeNotifier {
     _targetLanguage = value;
 
     /// auto fix if same
-    if (_targetLanguage == _sourceLanguage) {
-      _sourceLanguage =
-          languages.firstWhere((e) => e != _targetLanguage);
-    }
+    // if (_targetLanguage == _sourceLanguage) {
+    //   _sourceLanguage =
+    //       languages.firstWhere((e) => e != _targetLanguage);
+    // }
 
     notifyListeners();
   }
@@ -75,7 +87,7 @@ class TranslationProvider extends ChangeNotifier {
         )
     );
 
-    _translatedText = generated.message.content ?? "Sorry";
+    _translatedText = generated.message.content;
 
     print("translated text = $_translatedText");
 
@@ -101,7 +113,7 @@ class TranslationProvider extends ChangeNotifier {
   Future<void> speak(String text) async {
     if (text.isEmpty) return;
 
-    await flutterTts.setLanguage("en-US"); // change if needed
+    await flutterTts.setLanguage(languageCodes[_targetLanguage] ?? 'en'); // change if needed
     await flutterTts.setPitch(1.0);
     await flutterTts.setSpeechRate(0.5);
 

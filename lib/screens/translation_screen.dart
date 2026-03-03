@@ -35,18 +35,15 @@ class TranslationScreen extends StatelessWidget {
                                     border: OutlineInputBorder(),
                                   ),
                                   items: provider.languages.map((lang) {
-                                    bool disabled =
-                                        lang == provider.targetLanguage;
+                                    // bool disabled =
+                                    //     lang == provider.targetLanguage;
                     
                                     return DropdownMenuItem(
                                       value: lang,
-                                      enabled: !disabled,
                                       child: Text(
                                         lang,
                                         style: TextStyle(
-                                          color: disabled
-                                              ? Colors.grey
-                                              : Colors.black,
+                                          color: Colors.black,
                                         ),
                                       ),
                                     );
@@ -70,18 +67,13 @@ class TranslationScreen extends StatelessWidget {
                                     border: OutlineInputBorder(),
                                   ),
                                   items: provider.languages.map((lang) {
-                                    bool disabled =
-                                        lang == provider.sourceLanguage;
-                    
+
                                     return DropdownMenuItem(
                                       value: lang,
-                                      enabled: !disabled,
                                       child: Text(
                                         lang,
                                         style: TextStyle(
-                                          color: disabled
-                                              ? Colors.grey
-                                              : Colors.black,
+                                          color: Colors.black,
                                         ),
                                       ),
                                     );

@@ -80,7 +80,6 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
 
     if (!_isListening) return;
 
-    // print("Restarting listening...");
 
     _speech.listen(
       onResult: (val) {
@@ -112,24 +111,12 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
         listenMode: stt.ListenMode.dictation,
         cancelOnError: false,
       ),
+      localeId: widget.translationProvider.languageCodes[widget.translationProvider.sourceLanguage],
     );
   }
 
   void _startListening() async {
-    // bool available = await _speech.initialize(
-    //   onStatus: (val) {
-    //     if (val == 'done') {
-    //       _stopListening();
-    //       // _sendMessage();
-    //     }
-    //   },
-    //   onError: (val) => print('onError: $val'),
-    // );
-    //
-    // if (available) {
-
     if (!_speech.isAvailable) {
-      // print("Speech not available");
       return;
     }
 
@@ -169,6 +156,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
           listenMode: stt.ListenMode.dictation,
           cancelOnError: false,
         ),
+        localeId: widget.translationProvider.languageCodes[widget.translationProvider.sourceLanguage],
       );
     // }
   }
