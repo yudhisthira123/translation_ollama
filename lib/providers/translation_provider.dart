@@ -23,37 +23,44 @@ class TranslationProvider extends ChangeNotifier {
   // final ai_model = "llama3.2";
   final ai_model = "translategemma:latest";
 
-  String _sourceLanguage = "English";
-  String _targetLanguage = "Hindi";
+  String _hostLanguage = "German";
+  String _guestLanguage = "English";
+
+  String _sourceLanguage = "";
+  String _targetLanguage = "";
+
+  late String _speechLanguage = _guestLanguage;
 
   String _translatedText = "";
   String _inputText = "";
 
-  String get sourceLanguage => _sourceLanguage;
-  String get targetLanguage => _targetLanguage;
+  String get hostLanguage => _hostLanguage;
+  String get guestLanguage => _guestLanguage;
+  String get speechLanguage => _speechLanguage;
   String get translatedText => _translatedText;
   String get inputText => _inputText;
 
   void setSourceLanguage(String value) {
-    _sourceLanguage = value;
-
-    /// auto fix if same
-    // if (_sourceLanguage == _targetLanguage) {
-    //   _targetLanguage =
-    //       languages.firstWhere((e) => e != _sourceLanguage);
-    // }
-
+    _hostLanguage = value;
     notifyListeners();
   }
 
   void setTargetLanguage(String value) {
-    _targetLanguage = value;
+    _guestLanguage = value;
+    notifyListeners();
+  }
 
-    /// auto fix if same
-    // if (_targetLanguage == _sourceLanguage) {
-    //   _sourceLanguage =
-    //       languages.firstWhere((e) => e != _targetLanguage);
-    // }
+  void setSpeechLanguage(bool isHost) {
+    _speechLanguage = isHost ? guestLanguage : hostLanguage;
+
+    if(isHost) {
+     _sourceLanguage = hostLanguage;
+     _targetLanguage = guestLanguage;
+    }
+    else {
+      _sourceLanguage = guestLanguage;
+      _targetLanguage = hostLanguage;
+    }
 
     notifyListeners();
   }
@@ -78,11 +85,12 @@ class TranslationProvider extends ChangeNotifier {
 
 
     final generated = await client.generateChatCompletion(
+
         request: GenerateChatCompletionRequest(
             model: ai_model,
             messages: [
               Message(role: MessageRole.system, content: "You are a translation assistant. You can translate text from one language to another. Do not give explaination of translation. You need to just translate the exact text to required language in casual language."),
-              Message(role: MessageRole.user, content: "Translate from $sourceLanguage to $targetLanguage: $_inputText",)
+              Message(role: MessageRole.user, content: "Translate from ${_sourceLanguage} to $_targetLanguage: $_inputText",)
             ]
         )
     );
@@ -113,7 +121,7 @@ class TranslationProvider extends ChangeNotifier {
   Future<void> speak(String text) async {
     if (text.isEmpty) return;
 
-    await flutterTts.setLanguage(languageCodes[_targetLanguage] ?? 'en'); // change if needed
+    await flutterTts.setLanguage( languageCodes[_speechLanguage] ?? 'en'); // change if needed
     await flutterTts.setPitch(1.0);
     await flutterTts.setSpeechRate(0.5);
 

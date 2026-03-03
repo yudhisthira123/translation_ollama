@@ -24,7 +24,7 @@ class TranslationScreen extends StatelessWidget {
                         children: [
                     
                           DropdownButtonFormField<String>(
-                            value: provider.sourceLanguage,
+                            value: provider.hostLanguage,
                             decoration: const InputDecoration(
                               labelText: "Host Language",
                               border: OutlineInputBorder(),
@@ -51,7 +51,7 @@ class TranslationScreen extends StatelessWidget {
                           ),
 
                           const SizedBox(height: 10,),
-                          ChatInputWidget(translationProvider: provider),
+                          ChatInputWidget(translationProvider: provider, isHost: true,),
 
                           const SizedBox(height: 15),
 
@@ -111,7 +111,7 @@ class TranslationScreen extends StatelessWidget {
 
                           /// TARGET
                           DropdownButtonFormField<String>(
-                            value: provider.targetLanguage,
+                            value: provider.guestLanguage,
                             decoration: const InputDecoration(
                               labelText: "Guest Language",
                               border: OutlineInputBorder(),
@@ -136,7 +136,7 @@ class TranslationScreen extends StatelessWidget {
                           ),
 
                           const SizedBox(height: 10,),
-                          ChatInputWidget(translationProvider: provider),
+                          ChatInputWidget(translationProvider: provider, isHost: false,),
 
                           const SizedBox(height: 10),
 

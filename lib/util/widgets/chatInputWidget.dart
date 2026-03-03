@@ -4,10 +4,12 @@ import 'package:translation/providers/translation_provider.dart';
 
 class ChatInputWidget extends StatefulWidget {
   TranslationProvider translationProvider;
+  bool isHost = true;
 
   ChatInputWidget({
     super.key,
-     required this.translationProvider
+      required this.translationProvider,
+      required this.isHost
     });
 
   @override
@@ -40,19 +42,6 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
   }
 
   void _onSpeechStatus(String status) {
-    // print("Speech status: $status");
-
-    // if (status == "done" && _isListening) {
-    //   _speech.stop(); // important for Android
-    //   _restartListening();
-    // }
-    /// silence pause reached (pauseFor: 3 sec)
-    // if (status == "notListening" && _isListening) {
-    //   print("Stopped due to silence pause");
-    //   _stopListening(); // stop permanently
-    //   return;
-    // }
-
     /// Android timeout (~10 sec)
     if (status == "done" && _isListening) {
       // print("Restarting due to Android timeout");
@@ -60,20 +49,9 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
     }
   }
 
-  // void _restartListening() async {
-  //   if (!_isListening) return;
-  //
-  //   await _speech.stop();
-  //
-  //   await Future.delayed(const Duration(milliseconds: 300));
-  //
-  //   if (_isListening) {
-  //     print("Restarting listening...");
-  //     _startListening();
-  //   }
-  // }
-
   void _restartListening() async {
+    widget.translationProvider.setSpeechLanguage(widget.isHost);
+
     if (!_isListening || !_speechEnabled) return;
 
     await Future.delayed(const Duration(milliseconds: 300));
@@ -111,11 +89,16 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
         listenMode: stt.ListenMode.dictation,
         cancelOnError: false,
       ),
-      localeId: widget.translationProvider.languageCodes[widget.translationProvider.sourceLanguage],
+      localeId: widget.isHost
+          ? widget.translationProvider.languageCodes[widget.translationProvider.hostLanguage]
+          : widget.translationProvider.languageCodes[widget.translationProvider.guestLanguage],
     );
   }
 
   void _startListening() async {
+
+    widget.translationProvider.setSpeechLanguage(widget.isHost);
+
     if (!_speech.isAvailable) {
       return;
     }
@@ -156,7 +139,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
           listenMode: stt.ListenMode.dictation,
           cancelOnError: false,
         ),
-        localeId: widget.translationProvider.languageCodes[widget.translationProvider.sourceLanguage],
+        localeId: widget.translationProvider.languageCodes[widget.translationProvider.hostLanguage],
       );
     // }
   }
@@ -167,6 +150,9 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
   }
 
   void _sendMessage() {
+
+    widget.translationProvider.setSpeechLanguage(widget.isHost);
+
     final text = messageController.text.trim();
     if (text.isEmpty) return;
 
