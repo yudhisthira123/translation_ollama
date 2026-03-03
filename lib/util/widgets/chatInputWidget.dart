@@ -139,7 +139,9 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
           listenMode: stt.ListenMode.dictation,
           cancelOnError: false,
         ),
-        localeId: widget.translationProvider.languageCodes[widget.translationProvider.hostLanguage],
+        localeId: widget.isHost
+            ? widget.translationProvider.languageCodes[widget.translationProvider.hostLanguage]
+            : widget.translationProvider.languageCodes[widget.translationProvider.guestLanguage],
       );
     // }
   }
