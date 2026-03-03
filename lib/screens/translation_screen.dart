@@ -19,7 +19,7 @@ class TranslationScreen extends StatelessWidget {
                 child: SingleChildScrollView(
                   child: SafeArea(
                     child: Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 5),
                       child: Column(
                         children: [
                     

@@ -180,7 +180,10 @@ class _ChatInputWidgetState extends State<ChatInputWidget> {
             Container(
               width: 550,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              color: const Color(0xFF1E1E1E),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1E1E1E),
+                borderRadius: BorderRadius.circular(40),
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
