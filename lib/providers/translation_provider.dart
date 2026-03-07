@@ -18,10 +18,14 @@ class TranslationProvider extends ChangeNotifier {
     "Japanese": "ja"
   };
 
-  final client = OllamaClient(baseUrl: "http://192.168.2.37:11434/api");
+  final client = OllamaClient(
+      // config: OllamaConfig(
+      //     baseUrl: "http://192.168.1.189:11434"
+      // )
+  );
   // final client = OllamaClient(baseUrl: "http://192.168.0.106:11434/api");
   // final ai_model = "llama3.2";
-  final ai_model = "translategemma:latest";
+  final aiModel = "translategemma:latest";
 
   String _hostLanguage = "German";
   String _guestLanguage = "English";
@@ -71,32 +75,19 @@ class TranslationProvider extends ChangeNotifier {
   }
 
   Future<void> translate() async {
-
     print("Translation started for = $_inputText");
 
-    // final generated = await client.generateCompletion(
-    //   request: GenerateCompletionRequest(
-    //     model: ai_model,
-    //     prompt: "Translate from $sourceLanguage to $targetLanguage: $_inputText",
-    //   ),
-    // );
-    //
-    // _translatedText = generated.response ?? "Sorry";
-
-
-    final generated = await client.generateChatCompletion(
-
-        request: GenerateChatCompletionRequest(
-            model: ai_model,
+    final generated = await client.chat.create(
+        request: ChatRequest(
+            model: aiModel,
             messages: [
-              Message(role: MessageRole.system, content: "You are a translation assistant. You can translate text from one language to another. Do not give explaination of translation. You need to just translate the exact text to required language in casual language."),
-              Message(role: MessageRole.user, content: "Translate from ${_sourceLanguage} to $_targetLanguage: $_inputText",)
+              ChatMessage.system("You are a translation assistant. You can translate text from one language to another. Do not give explaination of translation. You need to just translate the exact text to required language in casual language."),
+              ChatMessage.user("Translate from ${_sourceLanguage} to $_targetLanguage: $_inputText")
             ]
         )
     );
 
-    _translatedText = generated.message.content;
-
+    _translatedText = generated.message?.content ?? "";
     print("translated text = $_translatedText");
 
     notifyListeners();
