@@ -19,9 +19,9 @@ class TranslationProvider extends ChangeNotifier {
   };
 
   final client = OllamaClient(
-      // config: OllamaConfig(
-      //     baseUrl: "http://192.168.1.189:11434"
-      // )
+      config: OllamaConfig(
+          baseUrl: "http://192.168.2.37:11434"
+      )
   );
   // final client = OllamaClient(baseUrl: "http://192.168.0.106:11434/api");
   // final ai_model = "llama3.2";
