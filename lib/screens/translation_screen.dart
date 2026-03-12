@@ -12,147 +12,157 @@ class TranslationScreen extends StatelessWidget {
       builder: (context, provider, child) {
         return Scaffold(
           resizeToAvoidBottomInset: true,
-          appBar: AppBar(title: const Text("Translator")),
-          body: Column(
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  child: SafeArea(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 5),
-                      child: Column(
-                        children: [
-                    
-                          DropdownButtonFormField<String>(
-                            value: provider.hostLanguage,
-                            decoration: const InputDecoration(
-                              labelText: "Host Language",
-                              border: OutlineInputBorder(),
-                            ),
-                            items: provider.languages.map((lang) {
-                              // bool disabled =
-                              //     lang == provider.targetLanguage;
+          appBar: AppBar(
+            title: const Text("Translator"),
+            centerTitle: true,
+          ),
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
 
-                              return DropdownMenuItem(
-                                value: lang,
-                                child: Text(
-                                  lang,
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                            onChanged: (val) {
-                              if (val != null) {
-                                provider.setSourceLanguage(val);
-                              }
-                            },
-                          ),
+                  /// HOST LANGUAGE
+                  _buildTextWidget("Host Language"),
+                  const SizedBox(height: 6),
 
-                          const SizedBox(height: 10,),
-                          ChatInputWidget(translationProvider: provider, isHost: true,),
-
-                          const SizedBox(height: 15),
-
-                          Row(
-                            children: [
-                              Text(
-                                "Translated Text",
-                                style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Container(
-                                height: 150,
-                                width: double.infinity,
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  border: Border.all(),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: SingleChildScrollView(
-                                  child: Text(
-                                    provider.translatedText.isEmpty
-                                        ? "Translated text appears here"
-                                        : provider.translatedText,
-                                  ),
-                                ),
-                              ),
-
-                              const SizedBox(height: 4),
-
-                              IconButton(
-                                icon: Icon(
-                                  provider.isSpeaking
-                                      ? Icons.stop
-                                      : Icons.volume_up,
-                                ),
-                                onPressed: () async {
-                                  if (provider.isSpeaking) {
-                                    await provider.stop();
-                                  } else {
-                                    final text = provider.translatedText.isEmpty
-                                        ? "Translated text appears here"
-                                        : provider.translatedText;
-                                    await provider.speak(text);
-                                  }
-                                },
-                              )
-                            ],
-                          ),
-
-                          /// TARGET
-                          DropdownButtonFormField<String>(
-                            value: provider.guestLanguage,
-                            decoration: const InputDecoration(
-                              labelText: "Guest Language",
-                              border: OutlineInputBorder(),
-                            ),
-                            items: provider.languages.map((lang) {
-
-                              return DropdownMenuItem(
-                                value: lang,
-                                child: Text(
-                                  lang,
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                            onChanged: (val) {
-                              if (val != null) {
-                                provider.setTargetLanguage(val);
-                              }
-                            },
-                          ),
-
-                          const SizedBox(height: 10,),
-                          ChatInputWidget(translationProvider: provider, isHost: false,),
-
-                          const SizedBox(height: 10),
-
-                        ],
+                  DropdownButtonFormField<String>(
+                    value: provider.hostLanguage,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                    ),
+                    items: provider.languages.map((lang) {
+                      return DropdownMenuItem(
+                        value: lang,
+                        child: Text(lang),
+                      );
+                    }).toList(),
+                    onChanged: (val) {
+                      if (val != null) {
+                        provider.setSourceLanguage(val);
+                      }
+                    },
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  ChatInputWidget(
+                    translationProvider: provider,
+                    isHost: true,
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  /// TRANSLATED TEXT
+                  _buildTextWidget("Translated Text"),
+
+                  const SizedBox(height: 8),
+
+                  Container(
+                    width: double.infinity,
+                    constraints: const BoxConstraints(minHeight: 140),
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade50,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
+                    child: Stack(
+                      children: [
+
+                        SingleChildScrollView(
+                          child: Text(
+                            provider.translatedText.isEmpty
+                                ? "Translated text appears here"
+                                : provider.translatedText,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              height: 1.4,
+                            ),
+                          ),
+                        ),
+
+                        Positioned(
+                          right: -10,
+                          bottom: -10,
+                          child: IconButton(
+                            icon: Icon(
+                              provider.isSpeaking
+                                  ? Icons.stop
+                                  : Icons.volume_up,
+                            ),
+                            onPressed: () async {
+                              if (provider.isSpeaking) {
+                                await provider.stop();
+                              } else {
+                                final text = provider.translatedText.isEmpty
+                                    ? "Translated text appears here"
+                                    : provider.translatedText;
+                                await provider.speak(text);
+                              }
+                            },
+                          ),
+                        )
+                      ],
                     ),
                   ),
-                ),
-              ),
 
-              /// INPUT FIELD
-              // ChatInputWidget(translationProvider: provider),
-            ],
+                  const SizedBox(height: 20),
+
+                  /// GUEST LANGUAGE
+                  _buildTextWidget("Guest Language"),
+
+                  const SizedBox(height: 6),
+
+                  DropdownButtonFormField<String>(
+                    value: provider.guestLanguage,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                    ),
+                    items: provider.languages.map((lang) {
+                      return DropdownMenuItem(
+                        value: lang,
+                        child: Text(lang),
+                      );
+                    }).toList(),
+                    onChanged: (val) {
+                      if (val != null) {
+                        provider.setTargetLanguage(val);
+                      }
+                    },
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  ChatInputWidget(
+                    translationProvider: provider,
+                    isHost: false,
+                  ),
+
+                  const SizedBox(height: 20),
+                ],
+              ),
+            ),
           ),
         );
       },
     );
   }
+  Widget _buildTextWidget(String value) {
+    return Text(
+      value,
+      style: TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+      ),
+    );
+  }
 }
+
