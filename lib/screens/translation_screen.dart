@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../constants.dart';
 import '../providers/translation_provider.dart';
 import '../util/widgets/chatInputWidget.dart';
 
@@ -11,10 +12,12 @@ class TranslationScreen extends StatelessWidget {
     return Consumer<TranslationProvider>(
       builder: (context, provider, child) {
         return Scaffold(
+          backgroundColor: Color(0xFF0F172A),
           resizeToAvoidBottomInset: true,
           appBar: AppBar(
-            title: const Text("Translator"),
+            title: Text("Translator",style: TextStyle(color: AppColor.textColor),),
             centerTitle: true,
+            backgroundColor: Color(0xFF0F172A),
           ),
           body: SafeArea(
             child: SingleChildScrollView(
@@ -29,10 +32,25 @@ class TranslationScreen extends StatelessWidget {
 
                   DropdownButtonFormField<String>(
                     value: provider.hostLanguage,
+                    style: TextStyle(
+                      color: AppColor.textColor,
+                    ),
+                    dropdownColor: AppColor.cardColor,
+                    iconEnabledColor: AppColor.textColor,
                     decoration: InputDecoration(
-                      border: OutlineInputBorder(
+                      filled: true,
+                      fillColor: AppColor.cardColor,
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: AppColor.textColor),
                         borderRadius: BorderRadius.circular(12),
                       ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: AppColor.textColor),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      // border: OutlineInputBorder(
+                      //   borderRadius: BorderRadius.circular(12),
+                      // ),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 12),
                     ),
                     items: provider.languages.map((lang) {
@@ -67,7 +85,8 @@ class TranslationScreen extends StatelessWidget {
                     constraints: const BoxConstraints(minHeight: 140),
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade50,
+                      // color: Colors.grey.shade50,
+                      color: AppColor.cardColor,
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(color: Colors.grey.shade300),
                     ),
@@ -80,6 +99,7 @@ class TranslationScreen extends StatelessWidget {
                                 ? "Translated text appears here"
                                 : provider.translatedText,
                             style: const TextStyle(
+                              color: AppColor.textColor,
                               fontSize: 15,
                               height: 1.4,
                             ),
@@ -94,6 +114,7 @@ class TranslationScreen extends StatelessWidget {
                               provider.isSpeaking
                                   ? Icons.stop
                                   : Icons.volume_up,
+                              color: AppColor.textColor,
                             ),
                             onPressed: () async {
                               if (provider.isSpeaking) {
@@ -120,10 +141,25 @@ class TranslationScreen extends StatelessWidget {
 
                   DropdownButtonFormField<String>(
                     value: provider.guestLanguage,
+                    style: TextStyle(
+                      color: AppColor.textColor,
+                    ),
+                    dropdownColor: AppColor.cardColor,
+                    iconEnabledColor: AppColor.textColor,
                     decoration: InputDecoration(
-                      border: OutlineInputBorder(
+                      filled: true,
+                      fillColor: AppColor.cardColor,
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: AppColor.textColor),
                         borderRadius: BorderRadius.circular(12),
                       ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: AppColor.textColor),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      // border: OutlineInputBorder(
+                      //   borderRadius: BorderRadius.circular(12),
+                      // ),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 12),
                     ),
                     items: provider.languages.map((lang) {
@@ -161,6 +197,7 @@ class TranslationScreen extends StatelessWidget {
       style: TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w600,
+        color: AppColor.textColor
       ),
     );
   }

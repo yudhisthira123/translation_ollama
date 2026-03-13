@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:translation/providers/translation_provider.dart';
 
+import '../../constants.dart';
+
 class ChatInputWidget extends StatefulWidget {
   TranslationProvider translationProvider;
   bool isHost = true;
@@ -199,7 +201,8 @@ class _ChatInputWidgetState extends State<ChatInputWidget> with SingleTickerProv
           width: 550,// Given 550 so that it will look good on web also.
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           decoration: BoxDecoration(
-            color: const Color(0xFF1E1E1E),
+            color: const Color(0xFF091123),
+            // color: AppColor.backgroundColor,
             borderRadius: BorderRadius.circular(40),
             boxShadow: [
               BoxShadow(
@@ -220,7 +223,8 @@ class _ChatInputWidgetState extends State<ChatInputWidget> with SingleTickerProv
                     hintText: "Type a message...",
                     hintStyle: const TextStyle(color: Colors.grey),
                     filled: true,
-                    fillColor: const Color(0xFF2C2C2C),
+                    // fillColor: const Color(0xFF2C2C2C),
+                    fillColor: AppColor.cardColor,
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16,
                       vertical: 12,
@@ -259,7 +263,8 @@ class _ChatInputWidgetState extends State<ChatInputWidget> with SingleTickerProv
   Widget _buildSendButton() {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF8E44AD),
+        // color: const Color(0xFF8E44AD),
+        color: AppColor.primaryButtonColor,
         borderRadius: BorderRadius.circular(50),
       ),
       child: IconButton(
@@ -287,7 +292,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> with SingleTickerProv
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: _isListening
-                    ? const Color(0xFF8E44AD)
+                    ? AppColor.primaryButtonColor
                     : Colors.transparent,
                 shape: BoxShape.circle,
               ),
