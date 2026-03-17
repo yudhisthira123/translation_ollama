@@ -11,14 +11,15 @@ class ChatInputWidget extends StatefulWidget {
   ChatInputWidget({
     super.key,
     required this.translationProvider,
-    required this.isHost
+    required this.isHost,
   });
 
   @override
   State<ChatInputWidget> createState() => _ChatInputWidgetState();
 }
 
-class _ChatInputWidgetState extends State<ChatInputWidget> with SingleTickerProviderStateMixin {
+class _ChatInputWidgetState extends State<ChatInputWidget>
+    with SingleTickerProviderStateMixin {
   final TextEditingController messageController = TextEditingController();
   late stt.SpeechToText _speech;
   bool _isListening = false;
@@ -27,7 +28,6 @@ class _ChatInputWidgetState extends State<ChatInputWidget> with SingleTickerProv
   bool _receivedFinalResult = false;
   late AnimationController _micAnimationController;
   late Animation<double> _micAnimation;
-
 
   @override
   void initState() {
@@ -39,21 +39,20 @@ class _ChatInputWidgetState extends State<ChatInputWidget> with SingleTickerProv
     );
 
     _micAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
-      CurvedAnimation(
-        parent: _micAnimationController,
-        curve: Curves.easeInOut,
-      ),
+      CurvedAnimation(parent: _micAnimationController, curve: Curves.easeInOut),
     );
 
-    _speech.initialize(
-      onStatus: _onSpeechStatus,
-      onError: (error) {
-        // print("Speech error: $error");
-        if (_isListening) _restartListening();
-      },
-    ).then((enabled) {
-      _speechEnabled = enabled;
-    });
+    _speech
+        .initialize(
+          onStatus: _onSpeechStatus,
+          onError: (error) {
+            // print("Speech error: $error");
+            if (_isListening) _restartListening();
+          },
+        )
+        .then((enabled) {
+          _speechEnabled = enabled;
+        });
   }
 
   void _onSpeechStatus(String status) {
@@ -73,7 +72,6 @@ class _ChatInputWidgetState extends State<ChatInputWidget> with SingleTickerProv
 
     if (!_isListening) return;
 
-
     _speech.listen(
       onResult: (val) {
         if (!_isListening) return;
@@ -89,11 +87,11 @@ class _ChatInputWidgetState extends State<ChatInputWidget> with SingleTickerProv
             ? _lastWords
             : "$_lastWords ${val.recognizedWords}".trim();
 
-
         setState(() {
           messageController.text = fullText;
-          messageController.selection =
-              TextSelection.collapsed(offset: text.length);
+          messageController.selection = TextSelection.collapsed(
+            offset: text.length,
+          );
         });
 
         widget.translationProvider.setInputText(fullText);
@@ -106,13 +104,16 @@ class _ChatInputWidgetState extends State<ChatInputWidget> with SingleTickerProv
         cancelOnError: false,
       ),
       localeId: widget.isHost
-          ? widget.translationProvider.languageCodes[widget.translationProvider.hostLanguage]
-          : widget.translationProvider.languageCodes[widget.translationProvider.guestLanguage],
+          ? widget.translationProvider.languageCodes[widget
+                .translationProvider
+                .hostLanguage]
+          : widget.translationProvider.languageCodes[widget
+                .translationProvider
+                .guestLanguage],
     );
   }
 
   void _startListening() async {
-
     widget.translationProvider.setSpeechLanguage(widget.isHost);
 
     if (!_speech.isAvailable) {
@@ -151,15 +152,19 @@ class _ChatInputWidgetState extends State<ChatInputWidget> with SingleTickerProv
         widget.translationProvider.setInputText(fullText);
       },
       listenFor: const Duration(seconds: 30),
-      pauseFor: const Duration(seconds:5),
+      pauseFor: const Duration(seconds: 5),
       listenOptions: stt.SpeechListenOptions(
         partialResults: true,
         listenMode: stt.ListenMode.dictation,
         cancelOnError: false,
       ),
       localeId: widget.isHost
-          ? widget.translationProvider.languageCodes[widget.translationProvider.hostLanguage]
-          : widget.translationProvider.languageCodes[widget.translationProvider.guestLanguage],
+          ? widget.translationProvider.languageCodes[widget
+                .translationProvider
+                .hostLanguage]
+          : widget.translationProvider.languageCodes[widget
+                .translationProvider
+                .guestLanguage],
     );
   }
 
@@ -171,7 +176,6 @@ class _ChatInputWidgetState extends State<ChatInputWidget> with SingleTickerProv
   }
 
   void _sendMessage() {
-
     widget.translationProvider.setSpeechLanguage(widget.isHost);
 
     final text = messageController.text.trim();
@@ -183,7 +187,6 @@ class _ChatInputWidgetState extends State<ChatInputWidget> with SingleTickerProv
 
     widget.translationProvider.setInputText(text);
     widget.translationProvider.translate();
-
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       messageController.clear();
@@ -198,10 +201,10 @@ class _ChatInputWidgetState extends State<ChatInputWidget> with SingleTickerProv
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: 550),
         child: Container(
-          width: 550,// Given 550 so that it will look good on web also.
+          width: 550, // Given 550 so that it will look good on web also.
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           decoration: BoxDecoration(
-            color: const Color(0xFF091123),
+            color: Theme.of(context).secondaryHeaderColor,
             // color: AppColor.backgroundColor,
             borderRadius: BorderRadius.circular(40),
             boxShadow: [
@@ -209,7 +212,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> with SingleTickerProv
                 color: Colors.black.withOpacity(0.15),
                 blurRadius: 10,
                 offset: const Offset(0, 3),
-              )
+              ),
             ],
           ),
           child: Row(
@@ -218,13 +221,13 @@ class _ChatInputWidgetState extends State<ChatInputWidget> with SingleTickerProv
                 child: TextField(
                   controller: messageController,
                   onChanged: widget.translationProvider.setInputText,
-                  style: const TextStyle(color: Colors.white),
+                  style: const TextStyle(color: Colors.grey),
                   decoration: InputDecoration(
                     hintText: "Type a message...",
                     hintStyle: const TextStyle(color: Colors.grey),
                     filled: true,
                     // fillColor: const Color(0xFF2C2C2C),
-                    fillColor: AppColor.cardColor,
+                    fillColor: Theme.of(context).cardColor,
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16,
                       vertical: 12,
@@ -252,6 +255,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> with SingleTickerProv
       ),
     );
   }
+
   @override
   void dispose() {
     _speech.stop();
@@ -264,7 +268,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> with SingleTickerProv
     return Container(
       decoration: BoxDecoration(
         // color: const Color(0xFF8E44AD),
-        color: AppColor.primaryButtonColor,
+        color: Theme.of(context).primaryColor,
         borderRadius: BorderRadius.circular(50),
       ),
       child: IconButton(
@@ -292,7 +296,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget> with SingleTickerProv
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: _isListening
-                    ? AppColor.primaryButtonColor
+                    ? Theme.of(context).primaryColor
                     : Colors.transparent,
                 shape: BoxShape.circle,
               ),
@@ -307,4 +311,3 @@ class _ChatInputWidgetState extends State<ChatInputWidget> with SingleTickerProv
     );
   }
 }
-
