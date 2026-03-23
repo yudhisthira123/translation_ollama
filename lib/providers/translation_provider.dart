@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:http/http.dart' as http;
 import 'package:ollama_dart/ollama_dart.dart';
 
 class TranslationProvider extends ChangeNotifier {
@@ -19,9 +22,9 @@ class TranslationProvider extends ChangeNotifier {
   };
 
   final client = OllamaClient(
-      // config: OllamaConfig(
-      //     baseUrl: "http://192.168.1.189:11434"
-      // )
+      config: OllamaConfig(
+          baseUrl: "http://192.168.2.37:11434"
+      )
   );
   // final client = OllamaClient(baseUrl: "http://192.168.0.106:11434/api");
   // final ai_model = "llama3.2";
@@ -58,8 +61,8 @@ class TranslationProvider extends ChangeNotifier {
     _speechLanguage = isHost ? guestLanguage : hostLanguage;
 
     if(isHost) {
-     _sourceLanguage = hostLanguage;
-     _targetLanguage = guestLanguage;
+      _sourceLanguage = hostLanguage;
+      _targetLanguage = guestLanguage;
     }
     else {
       _sourceLanguage = guestLanguage;
@@ -74,21 +77,66 @@ class TranslationProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Future<void> translate() async {
+  //   print("Translation started for = $_inputText");
+  //
+  //   final generated = await client.chat.create(
+  //       request: ChatRequest(
+  //           model: aiModel,
+  //           messages: [
+  //             ChatMessage.system("You are a translation assistant. You can translate text from one language to another. Do not give explaination of translation. You need to just translate the exact text to required language in casual language."),
+  //             ChatMessage.user("Translate from ${_sourceLanguage} to $_targetLanguage: $_inputText")
+  //           ]
+  //       )
+  //   );
+  //
+  //   _translatedText = generated.message?.content ?? "";
+  //   print("translated text = $_translatedText");
+  //
+  //   notifyListeners();
+  // }
+
   Future<void> translate() async {
     print("Translation started for = $_inputText");
 
-    final generated = await client.chat.create(
-        request: ChatRequest(
-            model: aiModel,
-            messages: [
-              ChatMessage.system("You are a translation assistant. You can translate text from one language to another. Do not give explaination of translation. You need to just translate the exact text to required language in casual language."),
-              ChatMessage.user("Translate from ${_sourceLanguage} to $_targetLanguage: $_inputText")
-            ]
-        )
-    );
+    final String apiKey = "";
+    final String region = "GermanyWestCentral";
 
-    _translatedText = generated.message?.content ?? "";
-    print("translated text = $_translatedText");
+    // print("Source Language = $_sourceLanguage and code is ${languageCodes[_sourceLanguage]}");
+    // print("Target Language = $_targetLanguage and code is ${languageCodes[_targetLanguage]}");
+    final url = Uri.parse(
+      "https://api.cognitive.microsofttranslator.com/translate"
+          "?api-version=3.0"
+          "&from=${languageCodes[_sourceLanguage]}"
+          "&to=${languageCodes[_targetLanguage]}",
+    );
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Ocp-Apim-Subscription-Key": apiKey,
+          "Ocp-Apim-Subscription-Region": region,
+        },
+        body: jsonEncode([
+          {"Text": _inputText}
+        ]),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        _translatedText =
+            data[0]["translations"][0]["text"].toString();
+
+        print("translated text = $_translatedText");
+      } else {
+        print("Error: ${response.statusCode}");
+        print("Body: ${response.body}");
+      }
+    } catch (e) {
+      print("Translation error: $e");
+    }
 
     notifyListeners();
   }
@@ -129,3 +177,4 @@ class TranslationProvider extends ChangeNotifier {
     notifyListeners();
   }
 }
+
