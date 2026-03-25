@@ -130,11 +130,6 @@ class TranslationProvider extends ChangeNotifier {
   Future<void> translate() async {
     print("Translation started for = $_inputText");
 
-    final String apiKey = "";
-    final String region = "GermanyWestCentral";
-
-    // print("Source Language = $_sourceLanguage and code is ${languageCodes[_sourceLanguage]}");
-    // print("Target Language = $_targetLanguage and code is ${languageCodes[_targetLanguage]}");
     final url = Uri.parse(
       "https://simpra.azurewebsites.net/Translation/Translate"
     );
@@ -143,8 +138,6 @@ class TranslationProvider extends ChangeNotifier {
         url,
         headers: {
           "Content-Type": "application/json",
-          "Ocp-Apim-Subscription-Key": apiKey,
-          "Ocp-Apim-Subscription-Region": region,
         },
         body: jsonEncode({
           "fromLanguage": languageCodes[_sourceLanguage],
