@@ -5,9 +5,23 @@ import '../apptheme/theme_provider.dart';
 import '../providers/translation_provider.dart';
 import '../util/widgets/chatInputWidget.dart';
 
-class TranslationScreen extends StatelessWidget {
+class TranslationScreen extends StatefulWidget {
   const TranslationScreen({super.key});
 
+  @override
+  State<TranslationScreen> createState() => _TranslationScreenState();
+}
+
+class _TranslationScreenState extends State<TranslationScreen> {
+
+  @override
+  void initState() {
+    super.initState();
+
+    Future.microtask(() {
+      context.read<TranslationProvider>().setDefaultLanguageFromDevice();
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Consumer<TranslationProvider>(
@@ -194,6 +208,7 @@ class TranslationScreen extends StatelessWidget {
       },
     );
   }
+
   Widget _buildTextWidget(String value,BuildContext context) {
     return Text(
       value,

@@ -11,8 +11,8 @@ class TranslationProvider extends ChangeNotifier {
     "French","Dutch","Russian","Portuguese","Japanese"];
   final Map<String, String> languageCodes = {
     "English": "en",
-    "Hindi": "hi-IN",
-    "German": "de-DE",
+    "Hindi": "hi",
+    "German": "de",
     "Spanish": "es",
     "French": "fr",
     "Dutch": "nl",
@@ -20,6 +20,37 @@ class TranslationProvider extends ChangeNotifier {
     "Portuguese": "pt",
     "Japanese": "ja"
   };
+
+  String getLanguageFromLocale(Locale locale) {
+    switch (locale.languageCode) {
+      case 'hi':
+        return 'Hindi';
+      case 'en':
+        return 'English';
+      case 'de':
+        return 'German';
+      case 'es':
+        return 'Spanish';
+      case 'fr':
+        return 'French';
+      case 'ru':
+        return 'Russian';
+      case 'pt':
+        return 'Portuguese';
+      case 'ja':
+        return 'Japanese';
+      default:
+        return 'English';
+    }
+  }
+
+  void setDefaultLanguageFromDevice() {
+    final locale = WidgetsBinding.instance.platformDispatcher.locale;
+    final lang = getLanguageFromLocale(locale);
+
+    _guestLanguage = lang;
+    notifyListeners();
+  }
 
   final client = OllamaClient(
       config: OllamaConfig(
@@ -105,10 +136,7 @@ class TranslationProvider extends ChangeNotifier {
     // print("Source Language = $_sourceLanguage and code is ${languageCodes[_sourceLanguage]}");
     // print("Target Language = $_targetLanguage and code is ${languageCodes[_targetLanguage]}");
     final url = Uri.parse(
-      "https://api.cognitive.microsofttranslator.com/translate"
-          "?api-version=3.0"
-          "&from=${languageCodes[_sourceLanguage]}"
-          "&to=${languageCodes[_targetLanguage]}",
+      "https://simpra.azurewebsites.net/Translation/Translate"
     );
     try {
       final response = await http.post(
@@ -118,9 +146,11 @@ class TranslationProvider extends ChangeNotifier {
           "Ocp-Apim-Subscription-Key": apiKey,
           "Ocp-Apim-Subscription-Region": region,
         },
-        body: jsonEncode([
-          {"Text": _inputText}
-        ]),
+        body: jsonEncode({
+          "fromLanguage": languageCodes[_sourceLanguage],
+          "toLanguage": languageCodes[_targetLanguage],
+          "textToBeTranslate": _inputText
+        },)
       );
 
       if (response.statusCode == 200) {

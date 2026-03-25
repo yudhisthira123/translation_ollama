@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:translation/screens/login_screen.dart';
 import 'apptheme/theme_provider.dart';
+import 'constants.dart';
 import 'providers/translation_provider.dart';
-import 'screens/translation_screen.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
   // runApp(const MyApp());
@@ -26,7 +28,15 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         theme: themeProvider.themeData,
         debugShowCheckedModeBanner: false,
-        home: const TranslationScreen(),
+        locale: WidgetsBinding.instance.window.locale,
+        supportedLocales: supportedLocales,
+        localizationsDelegates: [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        // home: const TranslationScreen(),
+        home: LoginScreen(),
       ),
     );
   }
