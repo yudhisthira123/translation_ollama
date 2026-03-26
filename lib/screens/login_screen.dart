@@ -3,6 +3,8 @@ import '../constants.dart';
 import 'welcome_screen.dart';
 
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
@@ -15,8 +17,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final String fixedPass = "admin";
 
   void login() {
-    if (userController.text == fixedUser &&
-        passController.text == fixedPass) {
+    if (userController.text == fixedUser && passController.text == fixedPass) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => WelcomeScreen()),
@@ -31,9 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(AppStrings.get(context, 'login')),
-      ),
+      appBar: AppBar(title: Text(AppStrings.get(context, 'login'))),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(

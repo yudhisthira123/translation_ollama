@@ -57,21 +57,23 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               AppStrings.get(context, 'skip'),
               style: const TextStyle(color: Colors.white),
             ),
-          )
+          ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(text, textAlign: TextAlign.center),
-            const SizedBox(height: 20),
-            IconButton(
-              icon: const Icon(Icons.volume_up, size: 40),
-              onPressed: speak,
-            ),
-          ],
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(text, textAlign: TextAlign.center),
+              const SizedBox(height: 20),
+              IconButton(
+                icon: const Icon(Icons.volume_up, size: 40),
+                onPressed: speak,
+              ),
+            ],
+          ),
         ),
       ),
     );

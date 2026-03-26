@@ -1,8 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:translation/providers/translation_provider.dart';
-
-import '../../constants.dart';
 
 class ChatInputWidget extends StatefulWidget {
   TranslationProvider translationProvider;
@@ -25,7 +24,6 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
   bool _isListening = false;
   String _lastWords = "";
   bool _speechEnabled = false;
-  bool _receivedFinalResult = false;
   late AnimationController _micAnimationController;
   late Animation<double> _micAnimation;
 
@@ -78,8 +76,6 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
         final text = val.recognizedWords;
 
         if (val.finalResult) {
-          _receivedFinalResult = true;
-
           _lastWords = "$_lastWords ${val.recognizedWords}".trim();
         }
 
@@ -120,7 +116,6 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
       return;
     }
 
-    // _lastWords = "";
     if (!_isListening) {
       _lastWords = messageController.text; // ✅ keep existing text
     }
@@ -130,7 +125,6 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
     _speech.listen(
       onResult: (val) {
         if (!_isListening) return;
-        final text = val.recognizedWords;
 
         if (val.finalResult) {
           /// append only final confirmed words
@@ -205,7 +199,6 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           decoration: BoxDecoration(
             color: Theme.of(context).secondaryHeaderColor,
-            // color: AppColor.backgroundColor,
             borderRadius: BorderRadius.circular(40),
             boxShadow: [
               BoxShadow(

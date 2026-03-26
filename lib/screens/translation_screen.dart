@@ -13,7 +13,6 @@ class TranslationScreen extends StatefulWidget {
 }
 
 class _TranslationScreenState extends State<TranslationScreen> {
-
   @override
   void initState() {
     super.initState();
@@ -22,6 +21,7 @@ class _TranslationScreenState extends State<TranslationScreen> {
       context.read<TranslationProvider>().setDefaultLanguageFromDevice();
     });
   }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<TranslationProvider>(
@@ -30,7 +30,10 @@ class _TranslationScreenState extends State<TranslationScreen> {
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           resizeToAvoidBottomInset: true,
           appBar: AppBar(
-            title: Text("Translator",style: TextStyle(color: Theme.of(context).colorScheme.primary),),
+            title: Text(
+              "Translator",
+              style: TextStyle(color: Theme.of(context).colorScheme.primary),
+            ),
             centerTitle: true,
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           ),
@@ -44,7 +47,7 @@ class _TranslationScreenState extends State<TranslationScreen> {
                   const SizedBox(height: 6),
 
                   /// HOST LANGUAGE
-                  _buildTextWidget("Host Language",context),
+                  _buildTextWidget("Host Language", context),
                   const SizedBox(height: 6),
 
                   DropdownButtonFormField<String>(
@@ -58,23 +61,26 @@ class _TranslationScreenState extends State<TranslationScreen> {
                       filled: true,
                       fillColor: Theme.of(context).cardColor,
                       enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary),
+                        borderSide: BorderSide(
+                          color: Theme.of(context).colorScheme.secondary,
+                        ),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary),
+                        borderSide: BorderSide(
+                          color: Theme.of(context).colorScheme.secondary,
+                        ),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       // border: OutlineInputBorder(
                       //   borderRadius: BorderRadius.circular(12),
                       // ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                      ),
                     ),
                     items: provider.languages.map((lang) {
-                      return DropdownMenuItem(
-                        value: lang,
-                        child: Text(lang),
-                      );
+                      return DropdownMenuItem(value: lang, child: Text(lang));
                     }).toList(),
                     onChanged: (val) {
                       if (val != null) {
@@ -85,15 +91,12 @@ class _TranslationScreenState extends State<TranslationScreen> {
 
                   const SizedBox(height: 12),
 
-                  ChatInputWidget(
-                    translationProvider: provider,
-                    isHost: true,
-                  ),
+                  ChatInputWidget(translationProvider: provider, isHost: true),
 
                   const SizedBox(height: 20),
 
                   /// TRANSLATED TEXT
-                  _buildTextWidget("Translated Text",context),
+                  _buildTextWidget("Translated Text", context),
 
                   const SizedBox(height: 8),
 
@@ -109,7 +112,6 @@ class _TranslationScreenState extends State<TranslationScreen> {
                     ),
                     child: Stack(
                       children: [
-
                         SingleChildScrollView(
                           child: Text(
                             provider.translatedText.isEmpty
@@ -144,7 +146,7 @@ class _TranslationScreenState extends State<TranslationScreen> {
                               }
                             },
                           ),
-                        )
+                        ),
                       ],
                     ),
                   ),
@@ -152,7 +154,7 @@ class _TranslationScreenState extends State<TranslationScreen> {
                   const SizedBox(height: 20),
 
                   /// GUEST LANGUAGE
-                  _buildTextWidget("Guest Language",context),
+                  _buildTextWidget("Guest Language", context),
 
                   const SizedBox(height: 6),
 
@@ -167,23 +169,26 @@ class _TranslationScreenState extends State<TranslationScreen> {
                       filled: true,
                       fillColor: Theme.of(context).cardColor,
                       enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary),
+                        borderSide: BorderSide(
+                          color: Theme.of(context).colorScheme.secondary,
+                        ),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary),
+                        borderSide: BorderSide(
+                          color: Theme.of(context).colorScheme.secondary,
+                        ),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       // border: OutlineInputBorder(
                       //   borderRadius: BorderRadius.circular(12),
                       // ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                      ),
                     ),
                     items: provider.languages.map((lang) {
-                      return DropdownMenuItem(
-                        value: lang,
-                        child: Text(lang),
-                      );
+                      return DropdownMenuItem(value: lang, child: Text(lang));
                     }).toList(),
                     onChanged: (val) {
                       if (val != null) {
@@ -194,10 +199,7 @@ class _TranslationScreenState extends State<TranslationScreen> {
 
                   const SizedBox(height: 12),
 
-                  ChatInputWidget(
-                    translationProvider: provider,
-                    isHost: false,
-                  ),
+                  ChatInputWidget(translationProvider: provider, isHost: false),
 
                   const SizedBox(height: 20),
                 ],
@@ -209,13 +211,13 @@ class _TranslationScreenState extends State<TranslationScreen> {
     );
   }
 
-  Widget _buildTextWidget(String value,BuildContext context) {
+  Widget _buildTextWidget(String value, BuildContext context) {
     return Text(
       value,
       style: TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w600,
-        color: Theme.of(context).colorScheme.primary
+        color: Theme.of(context).colorScheme.primary,
       ),
     );
   }
@@ -233,8 +235,7 @@ class ActiveThemeButton extends StatelessWidget {
       onTap: () {
         if (currentTheme == AppTheme.dark) {
           themeProvider.setTheme(AppTheme.light);
-        }
-        else {
+        } else {
           themeProvider.setTheme(AppTheme.dark);
         }
       },
@@ -245,10 +246,7 @@ class ActiveThemeButton extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: _borderForTheme(currentTheme).withOpacity(0.15),
-          border: Border.all(
-            color: _borderForTheme(currentTheme),
-            width: 1.5,
-          ),
+          border: Border.all(color: _borderForTheme(currentTheme), width: 1.5),
         ),
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 200),
