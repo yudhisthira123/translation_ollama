@@ -40,81 +40,107 @@ class AppStrings {
       'userId': 'User ID',
       'password': 'Password',
       'invalid': 'Invalid credentials',
-      'welcome': 'Welcome to our application.\nWe are glad to have you.\nEnjoy your experience!',
+      'welcome': 'Welcome To Your Smarter Translation Experience\nTap Below To Begin',
       'skip': 'Skip',
       'main': 'Main Screen',
+      'translator': 'Translator',
+      'translate': 'Translate'
     },
+
     'hi': {
       'login': 'लॉगिन',
       'userId': 'यूज़र आईडी',
       'password': 'पासवर्ड',
       'invalid': 'अमान्य विवरण',
-      'welcome': 'हमारे एप्लिकेशन में आपका स्वागत है।\nहमें खुशी है कि आप यहाँ हैं।\nअपने अनुभव का आनंद लें!',
+      'welcome': 'स्मार्ट अनुवाद के आपके अनुभव में आपका स्वागत है!\nशुरू करने के लिए नीचे टैप करें',
       'skip': 'स्किप करें',
       'main': 'मुख्य स्क्रीन',
+      'translator': 'अनुवादक',
+      'translate': 'अनुवाद करें'
     },
+
     'de': {
       'login': 'Anmelden',
       'userId': 'Benutzer-ID',
       'password': 'Passwort',
       'invalid': 'Ungültige Anmeldedaten',
-      'welcome': 'Willkommen in unserer Anwendung.\nWir freuen uns, dass Sie hier sind.\nViel Spaß!',
+      'welcome': 'Willkommen zu Ihrer intelligenteren Übersetzungserfahrung!\nTippen Sie unten, um zu beginnen',
       'skip': 'Überspringen',
       'main': 'Startbildschirm',
+      'translator': 'Übersetzer',
+      'translate': 'Übersetzen'
     },
+
     'es': {
       'login': 'Iniciar sesión',
       'userId': 'Usuario',
       'password': 'Contraseña',
       'invalid': 'Credenciales inválidas',
-      'welcome': 'Bienvenido a nuestra aplicación.\nNos alegra tenerte aquí.\n¡Disfruta!',
+      'welcome': 'Bienvenido a tu experiencia de traducción más inteligente\nToca abajo para comenzar',
       'skip': 'Saltar',
       'main': 'Pantalla principal',
+      'translator': 'Traductor',
+      'translate': 'Traducir'
     },
+
     'fr': {
       'login': 'Connexion',
       'userId': 'Identifiant',
       'password': 'Mot de passe',
       'invalid': 'Identifiants invalides',
-      'welcome': 'Bienvenue dans notre application.\nNous sommes heureux de vous avoir.\nProfitez!',
+      'welcome': 'Bienvenue dans votre expérience de traduction plus intelligente !\nAppuyez ci-dessous pour commencer',
       'skip': 'Passer',
       'main': 'Écran principal',
+      'translator': 'Traducteur',
+      'translate': 'Traduire'
     },
+
     'nl': {
       'login': 'Inloggen',
       'userId': 'Gebruikers-ID',
       'password': 'Wachtwoord',
       'invalid': 'Ongeldige gegevens',
-      'welcome': 'Welkom bij onze app.\nFijn dat je er bent.\nVeel plezier!',
+      'welcome': 'Welkom bij onze slimme vertaalervaring\nTik hieronder om te starten',
       'skip': 'Overslaan',
       'main': 'Hoofdscherm',
+      'translator': 'Vertaler',
+      'translate': 'Vertalen'
     },
+
     'ru': {
       'login': 'Войти',
       'userId': 'Имя пользователя',
       'password': 'Пароль',
       'invalid': 'Неверные данные',
-      'welcome': 'Добро пожаловать в наше приложение.\nМы рады вас видеть.\nНаслаждайтесь!',
+      'welcome': 'Добро пожаловать в мир интеллектуального перевода!\nНажмите ниже, чтобы начать',
       'skip': 'Пропустить',
       'main': 'Главный экран',
+      'translator': 'Переводчик',
+      'translate': 'Перевести'
     },
+
     'pt': {
       'login': 'Entrar',
       'userId': 'Usuário',
       'password': 'Senha',
       'invalid': 'Credenciais inválidas',
-      'welcome': 'Bem-vindo ao nosso aplicativo.\nEstamos felizes em tê-lo aqui.\nAproveite!',
+      'welcome': 'Bem-vindo à sua experiência de tradução mais inteligente!\nToque abaixo para começar',
       'skip': 'Pular',
       'main': 'Tela principal',
+      'translator': 'Tradutor',
+      'translate': 'Traduzir'
     },
+
     'ja': {
       'login': 'ログイン',
       'userId': 'ユーザーID',
       'password': 'パスワード',
       'invalid': '無効な認証情報',
-      'welcome': '私たちのアプリへようこそ。\nご利用いただきありがとうございます。\nお楽しみください！',
+      'welcome': 'よりスマートな翻訳体験へようこそ\n開始するには以下をタップしてください',
       'skip': 'スキップ',
       'main': 'メイン画面',
+      'translator': '翻訳者',
+      'translate': '翻訳する'
     },
   };
 

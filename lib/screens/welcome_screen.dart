@@ -1,4 +1,86 @@
+// import 'package:flutter/material.dart';
+// import 'package:flutter_tts/flutter_tts.dart';
+// import 'package:translation/screens/translation_screen.dart';
+//
+// import '../constants.dart';
+//
+// class WelcomeScreen extends StatefulWidget {
+//   const WelcomeScreen({super.key});
+//
+//   @override
+//   State<WelcomeScreen> createState() => _WelcomeScreenState();
+// }
+//
+// class _WelcomeScreenState extends State<WelcomeScreen> {
+//   final FlutterTts tts = FlutterTts();
+//
+//   final Map<String, String> ttsLang = {
+//     'en': 'en-US',
+//     'hi': 'hi-IN',
+//     'de': 'de-DE',
+//     'es': 'es-ES',
+//     'fr': 'fr-FR',
+//     'nl': 'nl-NL',
+//     'ru': 'ru-RU',
+//     'pt': 'pt-PT',
+//     'ja': 'ja-JP',
+//   };
+//
+//   Future speak() async {
+//     String lang = Localizations.localeOf(context).languageCode;
+//
+//     await tts.setLanguage(ttsLang[lang] ?? 'en-US');
+//     await tts.speak(AppStrings.get(context, 'welcome'));
+//
+//     tts.setCompletionHandler(() {
+//       goNext();
+//     });
+//   }
+//
+//   void goNext() {
+//     Navigator.pushReplacement(
+//       context,
+//       MaterialPageRoute(builder: (_) => TranslationScreen()),
+//     );
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     final text = AppStrings.get(context, 'welcome');
+//
+//     return Scaffold(
+//       appBar: AppBar(
+//         actions: [
+//           TextButton(
+//             onPressed: goNext,
+//             child: Text(
+//               AppStrings.get(context, 'skip'),
+//               style: const TextStyle(color: Colors.white),
+//             ),
+//           ),
+//         ],
+//       ),
+//       body: Center(
+//         child: Padding(
+//           padding: const EdgeInsets.all(20),
+//           child: Column(
+//             mainAxisAlignment: MainAxisAlignment.center,
+//             children: [
+//               Text(text, textAlign: TextAlign.center),
+//               const SizedBox(height: 20),
+//               IconButton(
+//                 icon: const Icon(Icons.volume_up, size: 40),
+//                 onPressed: speak,
+//               ),
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:translation/screens/translation_screen.dart';
 
@@ -12,6 +94,7 @@ class WelcomeScreen extends StatefulWidget {
 }
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
+
   final FlutterTts tts = FlutterTts();
 
   final Map<String, String> ttsLang = {
@@ -50,27 +133,106 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        actions: [
-          TextButton(
-            onPressed: goNext,
-            child: Text(
-              AppStrings.get(context, 'skip'),
-              style: const TextStyle(color: Colors.white),
-            ),
+        title: Text(
+            AppStrings.get(context, 'translator').toUpperCase(),
+          style: TextStyle(
+              color: Color(0xFF43B786),
+            fontWeight: FontWeight.w700,
+            fontSize: 16
           ),
-        ],
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.white,
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFFFFFFFF),
+              Color(0xFF66BB6A),
+              Color(0xFFFFFFFF),
+            ],
+            stops: [0.0, 0.5, 1.0],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+
+        child: SafeArea(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(text, textAlign: TextAlign.center),
+
+              const SizedBox(height: 30),
+
+              Expanded(
+                flex: 4,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: SvgPicture.asset(
+                    "assets/images/welcome_page_image.svg",
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+
               const SizedBox(height: 20),
-              IconButton(
-                icon: const Icon(Icons.volume_up, size: 40),
-                onPressed: speak,
+
+              Expanded(
+                flex: 2,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                  child: Text(
+                    text,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500
+                    ),
+                  ),
+                ),
+              ),
+
+              // 🚀 BUTTON
+              Expanded(
+                flex: 2,
+                child: Center(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [
+                          Color(0xFF8AD8B7),
+                          Color(0xFF0A4F32),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomLeft,
+                      ),
+                      borderRadius: BorderRadius.circular(50),
+                    ),
+                    child: ElevatedButton.icon(
+                      onPressed: speak,
+                      icon: const Icon(Icons.volume_up, color: Colors.white),
+                      label: Text(
+                        AppStrings.get(context, 'translate'),
+                        style: TextStyle(color: Colors.white,fontWeight: FontWeight.w400),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 30,
+                          vertical: 14,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                      ),
+                    ),
+                  )
+                ),
               ),
             ],
           ),
