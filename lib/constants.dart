@@ -1,7 +1,9 @@
 
 import 'dart:ui';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class AppColor {
   static const Color darkBgColor = Color(0xFF0F172A);
@@ -121,4 +123,15 @@ class AppStrings {
     return localizedValues[lang]?[key] ??
         localizedValues['en']![key]!;
   }
+}
+
+Future<bool> hasInternet() async {
+  final result = await Connectivity().checkConnectivity();
+  return result != ConnectivityResult.none;
+}
+
+void showError(BuildContext context,String message) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text(message)),
+  );
 }

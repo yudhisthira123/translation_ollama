@@ -1,7 +1,8 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:translation/providers/translation_provider.dart';
+
+import '../../constants.dart';
 
 class ChatInputWidget extends StatefulWidget {
   TranslationProvider translationProvider;
@@ -26,10 +27,11 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
   bool _speechEnabled = false;
   late AnimationController _micAnimationController;
   late Animation<double> _micAnimation;
-
+  bool _hasInternet = true;
   @override
   void initState() {
     super.initState();
+    checkInternet();
     _speech = stt.SpeechToText();
     _micAnimationController = AnimationController(
       vsync: this,
@@ -44,15 +46,31 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
         .initialize(
           onStatus: _onSpeechStatus,
           onError: (error) {
-            // print("Speech error: $error");
+            print("Speech error: $error");
+
+            if (error.errorMsg.contains("network")) {
+              showError(context,"⚠️ Internet required for speech");
+              _stopListening();
+              return;
+            }
+
+            // 🔁 Restart only for non-network errors
             if (_isListening) _restartListening();
           },
+          // onError: (error) {
+          //   // print("Speech error: $error");
+          //   if (_isListening) _restartListening();
+          // },
         )
         .then((enabled) {
           _speechEnabled = enabled;
         });
   }
 
+  void checkInternet() async {
+    _hasInternet = await hasInternet();
+    setState(() {});
+  }
   void _onSpeechStatus(String status) {
     /// Android timeout (~10 sec)
     if (status == "done" && _isListening) {
@@ -112,9 +130,21 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
   void _startListening() async {
     widget.translationProvider.setSpeechLanguage(widget.isHost);
 
-    if (!_speech.isAvailable) {
+    // 🔴 INTERNET CHECK
+    final internet = await hasInternet();
+
+    if (!internet) {
+      showError(context,"⚠️ No internet connection");
       return;
     }
+
+    if (!_speech.isAvailable) {
+      showError(context,"⚠️ Speech not available");
+      return;
+    }
+    // if (!_speech.isAvailable) {
+    //   return;
+    // }
 
     if (!_isListening) {
       _lastWords = messageController.text; // ✅ keep existing text
@@ -169,8 +199,15 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
     _speech.stop();
   }
 
-  void _sendMessage() {
+  Future<void> _sendMessage() async {
     widget.translationProvider.setSpeechLanguage(widget.isHost);
+
+    final internet = await hasInternet();
+
+    if (!internet) {
+      showError(context,"⚠️ No internet. Cannot translate.");
+      return;
+    }
 
     final text = messageController.text.trim();
     if (text.isEmpty) return;
@@ -266,14 +303,18 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
       ),
       child: IconButton(
         icon: const Icon(Icons.send, color: Colors.white),
-        onPressed: _sendMessage,
+        onPressed: !_hasInternet
+            ? () => showError(context,"No internet")
+            :_sendMessage,
       ),
     );
   }
 
   Widget _buildMicButton() {
     return GestureDetector(
-      onTap: () {
+      onTap: !_hasInternet
+          ? () => showError(context,"No internet")
+          : () {
         if (_isListening) {
           _stopListening();
         } else {

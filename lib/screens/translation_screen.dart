@@ -110,45 +110,121 @@ class _TranslationScreenState extends State<TranslationScreen> {
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(color: Colors.grey.shade300),
                     ),
-                    child: Stack(
-                      children: [
-                        SingleChildScrollView(
-                          child: Text(
-                            provider.translatedText.isEmpty
-                                ? "Translated text appears here"
-                                : provider.translatedText,
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.secondary,
-                              fontSize: 15,
-                              height: 1.4,
-                            ),
-                          ),
-                        ),
+                    child: SizedBox(
+                      height: 150,
+                      child: Stack(
+                        children: [
+                          // 🧠 Main Content
+                          Positioned.fill(
+                            child: Builder(
+                              builder: (context) {
+                                // 🔄 LOADING
+                                if (provider.isLoading) {
+                                  return const Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                }
 
-                        Positioned(
-                          right: -10,
-                          bottom: -10,
-                          child: IconButton(
-                            icon: Icon(
-                              provider.isSpeaking
-                                  ? Icons.stop
-                                  : Icons.volume_up,
-                              color: Theme.of(context).colorScheme.secondary,
+                                // ❌ ERROR
+                                if (provider.hasError) {
+                                  return Center(
+                                    child: Text(
+                                      provider.errorMessage,
+                                      style: TextStyle(
+                                        color: Colors.red,
+                                        fontSize: 14,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  );
+                                }
+
+                                // ✅ SUCCESS / DEFAULT
+                                return SingleChildScrollView(
+                                  child: Text(
+                                    provider.translatedText.isEmpty
+                                        ? "Translated text appears here"
+                                        : provider.translatedText,
+                                    style: TextStyle(
+                                      color: Theme.of(context).colorScheme.secondary,
+                                      fontSize: 15,
+                                      height: 1.4,
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
-                            onPressed: () async {
-                              if (provider.isSpeaking) {
-                                await provider.stop();
-                              } else {
-                                final text = provider.translatedText.isEmpty
-                                    ? "Translated text appears here"
-                                    : provider.translatedText;
-                                await provider.speak(text);
-                              }
-                            },
                           ),
-                        ),
-                      ],
-                    ),
+
+                          // 🔊 SPEAKER BUTTON
+                          Positioned(
+                            right: 0,
+                            bottom: 0,
+                            child: IconButton(
+                              icon: Icon(
+                                provider.isSpeaking ? Icons.stop : Icons.volume_up,
+                                color: Theme.of(context).colorScheme.secondary,
+                              ),
+
+                              // 🚨 Disable when loading or error
+                              onPressed: (provider.isLoading || provider.hasError)
+                                  ? null
+                                  : () async {
+                                if (provider.isSpeaking) {
+                                  await provider.stop();
+                                } else {
+                                  final text = provider.translatedText.isEmpty
+                                      ? "Translated text appears here"
+                                      : provider.translatedText;
+
+                                  await provider.speak(text);
+                                }
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+
+                    // Stack(
+                    //   children: [
+                    //     SingleChildScrollView(
+                    //       child: Text(
+                    //         provider.translatedText.isEmpty
+                    //             ? "Translated text appears here"
+                    //             : provider.translatedText,
+                    //         style: TextStyle(
+                    //           color: Theme.of(context).colorScheme.secondary,
+                    //           fontSize: 15,
+                    //           height: 1.4,
+                    //         ),
+                    //       ),
+                    //     ),
+                    //
+                    //     Positioned(
+                    //       right: -10,
+                    //       bottom: -10,
+                    //       child: IconButton(
+                    //         icon: Icon(
+                    //           provider.isSpeaking
+                    //               ? Icons.stop
+                    //               : Icons.volume_up,
+                    //           color: Theme.of(context).colorScheme.secondary,
+                    //         ),
+                    //         onPressed: () async {
+                    //           if (provider.isSpeaking) {
+                    //             await provider.stop();
+                    //           } else {
+                    //             final text = provider.translatedText.isEmpty
+                    //                 ? "Translated text appears here"
+                    //                 : provider.translatedText;
+                    //             await provider.speak(text);
+                    //           }
+                    //         },
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
                   ),
 
                   const SizedBox(height: 20),
