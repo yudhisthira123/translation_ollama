@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:translation/screens/login_screen.dart';
+import 'package:translation/screens/welcome_screen.dart';
 import 'apptheme/theme_provider.dart';
 import 'constants.dart';
 import 'providers/translation_provider.dart';
@@ -36,7 +37,8 @@ class MyApp extends StatelessWidget {
           GlobalCupertinoLocalizations.delegate,
         ],
         // home: const TranslationScreen(),
-        home: LoginScreen(),
+        home: WelcomeScreen(),
+        // home: LoginScreen(),
       ),
     );
   }

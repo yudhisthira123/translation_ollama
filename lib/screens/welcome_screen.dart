@@ -94,7 +94,6 @@ class WelcomeScreen extends StatefulWidget {
 }
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
-
   final FlutterTts tts = FlutterTts();
 
   final Map<String, String> ttsLang = {
@@ -134,110 +133,268 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-            AppStrings.get(context, 'translator').toUpperCase(),
-          style: TextStyle(
-              color: Color(0xFF43B786),
+          AppStrings.get(context, 'translator').toUpperCase(),
+          style: const TextStyle(
+            color: Color(0xFF43B786),
             fontWeight: FontWeight.w700,
-            fontSize: 16
+            fontSize: 16,
           ),
         ),
         centerTitle: true,
         backgroundColor: Colors.white,
       ),
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
 
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Color(0xFFFFFFFF),
-              Color(0xFF66BB6A),
-              Color(0xFFFFFFFF),
-            ],
-            stops: [0.0, 0.5, 1.0],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-
-        child: SafeArea(
-          child: Column(
-            children: [
-
-              const SizedBox(height: 30),
-
-              Expanded(
-                flex: 4,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: SvgPicture.asset(
-                    "assets/images/welcome_page_image.svg",
-                    fit: BoxFit.contain,
-                  ),
-                ),
+      body: Stack(
+        children: [
+          // 🌈 BACKGROUND GRADIENT
+          Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFFFFFFFF),
+                  Color(0xFF66BB6A),
+                  Color(0xFFFFFFFF),
+                ],
+                stops: [0.0, 0.5, 1.0],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
               ),
+            ),
+          ),
 
-              const SizedBox(height: 20),
+          // 🌊 WAVE 1 (BACK - LIGHT)
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: SizedBox(
+              height: 160,
+              child: SvgPicture.asset(
+                "assets/images/wave_light.svg", // your first SVG
+                fit: BoxFit.fill,
+              ),
+            ),
+          ),
 
-              Expanded(
-                flex: 2,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                  child: Text(
-                    text,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500
+          // 🌊 WAVE 2 (FRONT - DARK)
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: SizedBox(
+              height: 220,
+              child: SvgPicture.asset(
+                "assets/images/wave_dark.svg", // your second SVG
+                fit: BoxFit.fill,
+              ),
+            ),
+          ),
+
+          // 📦 MAIN CONTENT
+          SafeArea(
+            child: Column(
+              children: [
+                const SizedBox(height: 30),
+
+                // 🖼️ SVG IMAGE
+                Expanded(
+                  flex: 4,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: SvgPicture.asset(
+                      "assets/images/welcome_page_image.svg",
+                      fit: BoxFit.contain,
                     ),
                   ),
                 ),
-              ),
 
-              // 🚀 BUTTON
-              Expanded(
-                flex: 2,
-                child: Center(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [
-                          Color(0xFF8AD8B7),
-                          Color(0xFF0A4F32),
+                const SizedBox(height: 10),
+
+                // ✨ TEXT
+                Expanded(
+                  flex: 2,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    child: Text(
+                      text,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+
+                // 🚀 BUTTON
+                Expanded(
+                  flex: 2,
+                  child: Center(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF8AD8B7), Color(0xFF0A4F32)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomLeft,
+                        ),
+                        borderRadius: BorderRadius.circular(50),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.green.withOpacity(0.4),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
                         ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomLeft,
                       ),
-                      borderRadius: BorderRadius.circular(50),
-                    ),
-                    child: ElevatedButton.icon(
-                      onPressed: speak,
-                      icon: const Icon(Icons.volume_up, color: Colors.white),
-                      label: Text(
-                        AppStrings.get(context, 'translate'),
-                        style: TextStyle(color: Colors.white,fontWeight: FontWeight.w400),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        shadowColor: Colors.transparent,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 30,
-                          vertical: 14,
+                      child: ElevatedButton.icon(
+                        onPressed: speak,
+                        icon: const Icon(Icons.volume_up, color: Colors.white),
+                        label: Text(
+                          AppStrings.get(context, 'translate'),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w400,
+                          ),
                         ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 30,
+                            vertical: 14,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
                         ),
                       ),
                     ),
-                  )
+                  ),
                 ),
-              ),
-            ],
+
+                const SizedBox(height: 20),
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
+
+  // @override
+  // Widget build(BuildContext context) {
+  //   final text = AppStrings.get(context, 'welcome');
+  //
+  //   return Scaffold(
+  //     appBar: AppBar(
+  //       title: Text(
+  //           AppStrings.get(context, 'translator').toUpperCase(),
+  //         style: TextStyle(
+  //             color: Color(0xFF43B786),
+  //           fontWeight: FontWeight.w700,
+  //           fontSize: 16
+  //         ),
+  //       ),
+  //       centerTitle: true,
+  //       backgroundColor: Colors.white,
+  //     ),
+  //     body: Container(
+  //       width: double.infinity,
+  //       height: double.infinity,
+  //
+  //       decoration: const BoxDecoration(
+  //         gradient: LinearGradient(
+  //           colors: [
+  //             Color(0xFFFFFFFF),
+  //             Color(0xFF66BB6A),
+  //             Color(0xFFFFFFFF),
+  //           ],
+  //           stops: [0.0, 0.5, 1.0],
+  //           begin: Alignment.topCenter,
+  //           end: Alignment.bottomCenter,
+  //         ),
+  //       ),
+  //
+  //       child: SafeArea(
+  //         child: Column(
+  //           children: [
+  //
+  //             const SizedBox(height: 30),
+  //
+  //             Expanded(
+  //               flex: 4,
+  //               child: Padding(
+  //                 padding: const EdgeInsets.symmetric(horizontal: 20),
+  //                 child: SvgPicture.asset(
+  //                   "assets/images/welcome_page_image.svg",
+  //                   fit: BoxFit.contain,
+  //                 ),
+  //               ),
+  //             ),
+  //
+  //             const SizedBox(height: 20),
+  //
+  //             Expanded(
+  //               flex: 2,
+  //               child: Padding(
+  //                 padding: const EdgeInsets.symmetric(horizontal: 10.0),
+  //                 child: Text(
+  //                   text,
+  //                   textAlign: TextAlign.center,
+  //                   style: TextStyle(
+  //                     color: Colors.white,
+  //                     fontSize: 14,
+  //                     fontWeight: FontWeight.w500
+  //                   ),
+  //                 ),
+  //               ),
+  //             ),
+  //
+  //             // 🚀 BUTTON
+  //             Expanded(
+  //               flex: 2,
+  //               child: Center(
+  //                 child: Container(
+  //                   decoration: BoxDecoration(
+  //                     gradient: const LinearGradient(
+  //                       colors: [
+  //                         Color(0xFF8AD8B7),
+  //                         Color(0xFF0A4F32),
+  //                       ],
+  //                       begin: Alignment.topLeft,
+  //                       end: Alignment.bottomLeft,
+  //                     ),
+  //                     borderRadius: BorderRadius.circular(50),
+  //                   ),
+  //                   child: ElevatedButton.icon(
+  //                     onPressed: speak,
+  //                     icon: const Icon(Icons.volume_up, color: Colors.white),
+  //                     label: Text(
+  //                       AppStrings.get(context, 'translate'),
+  //                       style: TextStyle(color: Colors.white,fontWeight: FontWeight.w400),
+  //                     ),
+  //                     style: ElevatedButton.styleFrom(
+  //                       backgroundColor: Colors.transparent,
+  //                       shadowColor: Colors.transparent,
+  //                       padding: const EdgeInsets.symmetric(
+  //                         horizontal: 30,
+  //                         vertical: 14,
+  //                       ),
+  //                       shape: RoundedRectangleBorder(
+  //                         borderRadius: BorderRadius.circular(30),
+  //                       ),
+  //                     ),
+  //                   ),
+  //                 )
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 }
