@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 
 class AppColor {
   static const Color darkBgColor = Color(0xFF0F172A);
@@ -159,5 +160,24 @@ Future<bool> hasInternet() async {
 void showError(BuildContext context,String message) {
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(content: Text(message)),
+  );
+}
+
+Widget circleButton(
+    double height,
+    double width,
+    String icon, {
+      required VoidCallback onTap,
+    }) {
+  return GestureDetector(
+    onTap: onTap,
+    child: SizedBox(
+      height: height,
+      width: width,
+      child: SvgPicture.asset(
+        icon, // your first SVG
+        fit: BoxFit.fill,
+      ),
+    ),
   );
 }

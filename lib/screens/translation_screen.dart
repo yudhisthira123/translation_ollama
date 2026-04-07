@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
+import 'package:translation/screens/welcome_screen.dart';
 import '../apptheme/apptheme.dart';
 import '../apptheme/theme_provider.dart';
 import '../providers/translation_provider.dart';
+import '../responsive/responsive.dart';
 import '../util/widgets/chatInputWidget.dart';
 
 class TranslationScreen extends StatefulWidget {
@@ -19,6 +22,7 @@ class _TranslationScreenState extends State<TranslationScreen> {
 
     Future.microtask(() {
       context.read<TranslationProvider>().setDefaultLanguageFromDevice();
+      context.read<TranslationProvider>().messages.clear();
     });
   }
 
@@ -26,62 +30,504 @@ class _TranslationScreenState extends State<TranslationScreen> {
   Widget build(BuildContext context) {
     return Consumer<TranslationProvider>(
       builder: (context, provider, child) {
-        return Scaffold(
-          // backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          backgroundColor: Colors.white,
-          resizeToAvoidBottomInset: true,
-          appBar: AppBar(
-            title: Text(
-              "Translator",
-              style: TextStyle(color: Color(0xFF43B786)),
-            ),
-            centerTitle: true,
+        if (Responsive.isMobile(context)) {
+          return Scaffold(
+            // backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             backgroundColor: Colors.white,
-          ),
-          body: Stack(
-            children: [
-              Container(
-                width: double.infinity,
-                height: double.infinity,
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Color(0xFFFFFFFF),
-                      Color(0xFF66BB6A),
-                      Color(0xFFFFFFFF),
-                    ],
-                    stops: [0.0, 0.5, 1.0],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
+            resizeToAvoidBottomInset: true,
+            appBar: AppBar(
+              title: Text(
+                "Translator",
+                style: TextStyle(color: Color(0xFF43B786)),
+              ),
+              actions: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pushReplacement(
+                          context,
+                          PageRouteBuilder(
+                            pageBuilder: (context, animation,
+                                secondaryAnimation) =>
+                                WelcomeScreen(),
+                            transitionsBuilder: (context, animation,
+                                secondaryAnimation, child) {
+                              const begin = Offset(1.0, 0.0); // right → left
+                              const end = Offset.zero;
+                              const curve = Curves.easeInOut;
+
+                              var tween = Tween(begin: begin, end: end).chain(
+                                CurveTween(curve: curve),
+                              );
+
+                              return SlideTransition(
+                                position: animation.drive(tween),
+                                child: child,
+                              );
+                            },
+                            transitionDuration: Duration(milliseconds: 500),
+                          ),
+                        );
+                        // Navigator.pushReplacement(
+                        //   context,
+                        //   MaterialPageRoute(builder: (_) => WelcomeScreen()),
+                        // );
+                      },
+                      child: SizedBox(
+                        height: 35,
+                        width: 44,
+                        child: SvgPicture.asset(
+                          "assets/images/close.svg",
+                          fit: BoxFit.fill,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 15),
+                  ],
+                ),
+              ],
+              centerTitle: true,
+              backgroundColor: Colors.white,
+            ),
+            body: Stack(
+              children: [
+                Container(
+                  width: double.infinity,
+                  height: double.infinity,
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Color(0xFFFFFFFF),
+                        Color(0xFF66BB6A),
+                        Color(0xFFFFFFFF),
+                      ],
+                      stops: [0.0, 0.5, 1.0],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
                   ),
                 ),
-              ),
-              SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 6,
-                  ),
-                  child: Column(
-                    children: [
-                      Expanded(flex: 1, child: SizedBox()),
-                      Expanded(
-                        flex: 10,
-                        child: Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            CustomPaint(
-                              size: Size(double.infinity, double.infinity),
-                              painter: DiagonalPainter(),
-                            ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // ChatInputWidget(translationProvider: provider, isHost: true),
-                                Expanded(
-                                  flex: 4,
-                                  child: Transform.rotate(
-                                    angle: 3.1416, // 180 degrees in radians
+                SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 6,
+                    ),
+                    child: Column(
+                      children: [
+                        Expanded(flex: 1, child: SizedBox()),
+                        Expanded(
+                          flex: 14,
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(14),
+                                child: CustomPaint(
+                                  size: Size(double.infinity, double.infinity),
+                                  painter: DiagonalPainter(),
+                                ),
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    flex: 6,
+                                    child: Transform.rotate(
+                                      angle: 3.1416, // 180 degrees in radians
+                                      child: Container(
+                                        width: double.infinity,
+                                        constraints: const BoxConstraints(
+                                          minHeight: 140,
+                                        ),
+                                        padding: const EdgeInsets.all(14),
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(
+                                              14),
+                                        ),
+                                        child: SizedBox(
+                                          height: 150,
+                                          child: Stack(
+                                            children: [
+                                              // 🧠 Main Content
+                                              Positioned.fill(
+                                                child: Builder(
+                                                  builder: (context) {
+                                                    // 🔄 LOADING
+                                                    // if (provider.isLoading) {
+                                                    //   return const Center(
+                                                    //     child:
+                                                    //         CircularProgressIndicator(),
+                                                    //   );
+                                                    // }
+
+                                                    // ❌ ERROR
+                                                    if (provider.hasError) {
+                                                      return Center(
+                                                        child: Text(
+                                                          provider.errorMessage,
+                                                          style: TextStyle(
+                                                            color: Colors.red,
+                                                            fontSize: 14,
+                                                          ),
+                                                          textAlign:
+                                                          TextAlign.center,
+                                                        ),
+                                                      );
+                                                    }
+
+                                                    // ✅ SUCCESS / DEFAULT
+                                                    return SingleChildScrollView(
+                                                      reverse: true,
+                                                      child: Padding(
+                                                        padding:
+                                                        const EdgeInsets.only(
+                                                          bottom: 10.0,
+                                                        ),
+                                                        child: Column(
+                                                          crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                          children: [
+
+                                                            /// 🟢 HISTORY
+                                                            ...provider.messages
+                                                                .map((msg,) {
+                                                              return Padding(
+                                                                padding:
+                                                                const EdgeInsets
+                                                                    .symmetric(
+                                                                  vertical: 4,
+                                                                ),
+                                                                child: Text(
+                                                                  "${msg
+                                                                      .speakerLabel} - ${msg
+                                                                      .isHost
+                                                                      ? msg
+                                                                      .originalText
+                                                                      : msg
+                                                                      .translatedText}",
+                                                                  style: TextStyle(
+                                                                    fontSize: 14,
+                                                                    fontWeight:
+                                                                    FontWeight
+                                                                        .w400,
+                                                                    color: Colors
+                                                                        .black,
+                                                                  ),
+                                                                ),
+                                                              );
+                                                            }),
+
+                                                            /// 🔴 LIVE TEXT
+                                                            if (provider
+                                                                .isHostSpeaking &&
+                                                                provider
+                                                                    .liveText
+                                                                    .isNotEmpty)
+                                                              Text(
+                                                                "Host - ${provider
+                                                                    .liveText}",
+                                                                style: TextStyle(
+                                                                  fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                                  color: Colors.black
+                                                                ),
+                                                              ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    );
+                                                  },
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 2,
+                                    child: LayoutBuilder(
+                                      builder: (context, constraints) {
+                                        return Stack(
+                                          children: [
+
+                                            /// 🔵 LEFT 50% SVG
+                                            Positioned(
+                                              left: 0,
+                                              top: 0,
+                                              bottom: 0,
+                                              width: constraints.maxWidth * 0.5,
+                                              child: SvgPicture.asset(
+                                                "assets/images/green_rectangle.svg",
+                                                fit: BoxFit.fill,
+                                              ),
+                                            ),
+
+                                            /// 🟢 RIGHT 50% SVG
+                                            Positioned(
+                                              right: 0,
+                                              top: 0,
+                                              bottom: 0,
+                                              width: constraints.maxWidth * 0.5,
+                                              child: SvgPicture.asset(
+                                                "assets/images/white_rectangle.svg",
+                                                fit: BoxFit.fill,
+                                              ),
+                                            ),
+                                            Row(
+                                              children: [
+                                                SizedBox(width: 8),
+                                                Expanded(
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                    children: [
+                                                      Expanded(
+                                                        child: Row(
+                                                          crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .end,
+                                                          children: [
+                                                            SizedBox(width: 15),
+                                                            Transform.rotate(
+                                                              angle: 3.1416,
+                                                              child: SizedBox(
+                                                                height: 10,
+                                                                width: 15,
+                                                                child: Image
+                                                                    .asset(
+                                                                  "assets/images/polygon.png",
+                                                                  fit:
+                                                                  BoxFit.fill,
+                                                                  color: Color(
+                                                                    0xFFC9DED4,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      DropdownButtonFormField<
+                                                          String
+                                                      >(
+                                                        value:
+                                                        provider.hostLanguage,
+                                                        style: TextStyle(
+                                                          color: Colors.black,
+                                                        ),
+                                                        iconSize: 0,
+                                                        dropdownColor:
+                                                        Colors.white,
+                                                        iconEnabledColor:
+                                                        Theme
+                                                            .of(context)
+                                                            .colorScheme
+                                                            .secondary,
+                                                        decoration: InputDecoration(
+                                                          filled: true,
+                                                          fillColor: Color(
+                                                            0xFFC9DED4,
+                                                          ),
+                                                          enabledBorder:
+                                                          OutlineInputBorder(
+                                                            borderSide: BorderSide(
+                                                              color: Colors
+                                                                  .transparent,
+                                                            ),
+                                                            borderRadius:
+                                                            BorderRadius
+                                                                .circular(
+                                                              12,
+                                                            ),
+                                                          ),
+                                                          focusedBorder:
+                                                          OutlineInputBorder(
+                                                            borderSide: BorderSide(
+                                                              color: Colors
+                                                                  .transparent,
+                                                            ),
+                                                            borderRadius:
+                                                            BorderRadius
+                                                                .circular(
+                                                              12,
+                                                            ),
+                                                          ),
+                                                          // border: OutlineInputBorder(
+                                                          //   borderRadius: BorderRadius.circular(12),
+                                                          // ),
+                                                          contentPadding:
+                                                          const EdgeInsets
+                                                              .symmetric(
+                                                            horizontal: 12,
+                                                          ),
+                                                        ),
+                                                        items: provider
+                                                            .languages
+                                                            .reversed
+                                                            .map((lang) {
+                                                          return DropdownMenuItem(
+                                                            value: lang,
+                                                            child: Transform
+                                                                .rotate(
+                                                              angle: 3.1416,
+                                                              child: Row(
+                                                                children: [
+                                                                  Text(lang),
+                                                                  Icon(
+                                                                    Icons
+                                                                        .arrow_drop_down,
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          );
+                                                        })
+                                                            .toList(),
+                                                        onChanged: (val) {
+                                                          if (val != null) {
+                                                            provider
+                                                                .setSourceLanguage(
+                                                              val,
+                                                            );
+                                                          }
+                                                        },
+                                                      ),
+                                                      Expanded(
+                                                          child: SizedBox()),
+                                                    ],
+                                                  ),
+                                                ),
+                                                SizedBox(width: 5),
+                                                SizedBox(
+                                                  height: 35,
+                                                  width: 40,
+                                                  child: Image.asset(
+                                                    "assets/images/swap_button.png",
+                                                    fit: BoxFit.fill,
+                                                  ),
+                                                ),
+                                                SizedBox(width: 5),
+                                                Expanded(
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                    children: [
+                                                      Expanded(
+                                                          child: SizedBox()),
+                                                      DropdownButtonFormField<
+                                                          String
+                                                      >(
+                                                        value: provider
+                                                            .guestLanguage,
+                                                        style: TextStyle(
+                                                          color: Colors.black,
+                                                        ),
+                                                        dropdownColor:
+                                                        Colors.white,
+                                                        iconEnabledColor:
+                                                        Theme
+                                                            .of(context)
+                                                            .colorScheme
+                                                            .secondary,
+                                                        decoration: InputDecoration(
+                                                          filled: true,
+                                                          fillColor: Color(
+                                                            0xFFC9DED4,
+                                                          ),
+                                                          enabledBorder:
+                                                          OutlineInputBorder(
+                                                            borderSide: BorderSide(
+                                                              color: Colors
+                                                                  .transparent,
+                                                            ),
+                                                            borderRadius:
+                                                            BorderRadius
+                                                                .circular(
+                                                              12,
+                                                            ),
+                                                          ),
+                                                          focusedBorder:
+                                                          OutlineInputBorder(
+                                                            borderSide: BorderSide(
+                                                              color: Colors
+                                                                  .transparent,
+                                                            ),
+                                                            borderRadius:
+                                                            BorderRadius
+                                                                .circular(
+                                                              12,
+                                                            ),
+                                                          ),
+                                                          // border: OutlineInputBorder(
+                                                          //   borderRadius: BorderRadius.circular(12),
+                                                          // ),
+                                                          contentPadding:
+                                                          const EdgeInsets
+                                                              .symmetric(
+                                                            horizontal: 12,
+                                                          ),
+                                                        ),
+                                                        items: provider
+                                                            .languages
+                                                            .map((lang) {
+                                                          return DropdownMenuItem(
+                                                            value: lang,
+                                                            child: Text(lang),
+                                                          );
+                                                        })
+                                                            .toList(),
+                                                        onChanged: (val) {
+                                                          if (val != null) {
+                                                            provider
+                                                                .setTargetLanguage(
+                                                              val,
+                                                            );
+                                                          }
+                                                        },
+                                                      ),
+                                                      Expanded(
+                                                        child: Row(
+                                                          crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                          children: [
+                                                            SizedBox(width: 15),
+                                                            SizedBox(
+                                                              height: 10,
+                                                              width: 15,
+                                                              child: Image
+                                                                  .asset(
+                                                                "assets/images/polygon.png",
+                                                                fit: BoxFit
+                                                                    .fill,
+                                                                color: Color(
+                                                                  0xFFC9DED4,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                SizedBox(width: 8),
+                                              ],
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 6,
                                     child: Container(
                                       width: double.infinity,
                                       constraints: const BoxConstraints(
@@ -100,12 +546,12 @@ class _TranslationScreenState extends State<TranslationScreen> {
                                               child: Builder(
                                                 builder: (context) {
                                                   // 🔄 LOADING
-                                                  if (provider.isLoading) {
-                                                    return const Center(
-                                                      child:
-                                                          CircularProgressIndicator(),
-                                                    );
-                                                  }
+                                                  // if (provider.isLoading) {
+                                                  //   return const Center(
+                                                  //     child:
+                                                  //         CircularProgressIndicator(),
+                                                  //   );
+                                                  // }
 
                                                   // ❌ ERROR
                                                   if (provider.hasError) {
@@ -117,27 +563,90 @@ class _TranslationScreenState extends State<TranslationScreen> {
                                                           fontSize: 14,
                                                         ),
                                                         textAlign:
-                                                            TextAlign.center,
+                                                        TextAlign.center,
                                                       ),
                                                     );
                                                   }
 
                                                   // ✅ SUCCESS / DEFAULT
                                                   return SingleChildScrollView(
-                                                    child: Text(
-                                                      provider
-                                                              .translatedText
-                                                              .isEmpty
-                                                          ? "Translated text appears here"
-                                                          : provider
-                                                                .translatedText,
-                                                      style: TextStyle(
-                                                        color: Colors.black,
-                                                        fontSize: 15,
-                                                        height: 1.4,
+                                                    reverse: true,
+                                                    child: Padding(
+                                                      padding:
+                                                      const EdgeInsets.only(
+                                                        bottom: 10.0,
+                                                      ),
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                        children: [
+
+                                                          /// 🟢 HISTORY
+                                                          ...provider.messages
+                                                              .map((msg,) {
+                                                            return Padding(
+                                                              padding:
+                                                              const EdgeInsets
+                                                                  .symmetric(
+                                                                vertical: 4,
+                                                              ),
+                                                              child: Text(
+                                                                "${msg
+                                                                    .speakerLabel} - ${msg
+                                                                    .isHost
+                                                                    ? msg
+                                                                    .translatedText
+                                                                    : msg
+                                                                    .originalText}",
+                                                                style: TextStyle(
+                                                                  fontSize: 14,
+                                                                  fontWeight:
+                                                                  FontWeight
+                                                                      .w400,
+                                                                  color: Colors
+                                                                      .black,
+                                                                ),
+                                                              ),
+                                                            );
+                                                          }),
+
+                                                          /// 🔴 LIVE TEXT
+                                                          if (!provider
+                                                              .isHostSpeaking &&
+                                                              provider
+                                                                  .liveText
+                                                                  .isNotEmpty)
+                                                            Text(
+                                                              "Guest - ${provider
+                                                                  .liveText}",
+                                                              style: TextStyle(
+                                                                fontWeight:
+                                                                FontWeight
+                                                                    .bold,
+                                                                color:
+                                                                Colors.black,
+                                                              ),
+                                                            ),
+                                                        ],
                                                       ),
                                                     ),
                                                   );
+                                                  // return SingleChildScrollView(
+                                                  //   child: Text(
+                                                  //     provider
+                                                  //             .translatedText
+                                                  //             .isEmpty
+                                                  //         ? "Translated text appears here"
+                                                  //         : provider
+                                                  //               .translatedText,
+                                                  //     style: TextStyle(
+                                                  //       color: Colors.black,
+                                                  //       fontSize: 15,
+                                                  //       height: 1.4,
+                                                  //     ),
+                                                  //   ),
+                                                  // );
                                                 },
                                               ),
                                             ),
@@ -171,366 +680,877 @@ class _TranslationScreenState extends State<TranslationScreen> {
                                           ],
                                         ),
                                       ),
+
+                                      // Stack(
+                                      //   children: [
+                                      //     SingleChildScrollView(
+                                      //       child: Text(
+                                      //         provider.translatedText.isEmpty
+                                      //             ? "Translated text appears here"
+                                      //             : provider.translatedText,
+                                      //         style: TextStyle(
+                                      //           color: Theme.of(context).colorScheme.secondary,
+                                      //           fontSize: 15,
+                                      //           height: 1.4,
+                                      //         ),
+                                      //       ),
+                                      //     ),
+                                      //
+                                      //     Positioned(
+                                      //       right: -10,
+                                      //       bottom: -10,
+                                      //       child: IconButton(
+                                      //         icon: Icon(
+                                      //           provider.isSpeaking
+                                      //               ? Icons.stop
+                                      //               : Icons.volume_up,
+                                      //           color: Theme.of(context).colorScheme.secondary,
+                                      //         ),
+                                      //         onPressed: () async {
+                                      //           if (provider.isSpeaking) {
+                                      //             await provider.stop();
+                                      //           } else {
+                                      //             final text = provider.translatedText.isEmpty
+                                      //                 ? "Translated text appears here"
+                                      //                 : provider.translatedText;
+                                      //             await provider.speak(text);
+                                      //           }
+                                      //         },
+                                      //       ),
+                                      //     ),
+                                      //   ],
+                                      // ),
                                     ),
                                   ),
-                                ),
-                                Expanded(
-                                  flex: 1,
+
+                                  // ChatInputWidget(translationProvider: provider, isHost: false),
+                                ],
+                              ),
+                              Positioned(
+                                top: -40,
+                                left: 0,
+                                right: 0,
+                                child: SizedBox(
+                                  height: 90,
                                   child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      SizedBox(width: 10),
-                                      Expanded(
-                                        child: DropdownButtonFormField<String>(
-                                          value: provider.hostLanguage,
-                                          style: TextStyle(color: Colors.black),
-                                          dropdownColor: Colors.white,
-                                          iconEnabledColor: Theme.of(
-                                            context,
-                                          ).colorScheme.secondary,
-                                          decoration: InputDecoration(
-                                            filled: true,
-                                            fillColor: Color(0xFFE9EDEBA),
-                                            enabledBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
-                                                color: Colors.transparent,
-                                              ),
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                            ),
-                                            focusedBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
-                                                color: Colors.transparent,
-                                              ),
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                            ),
-                                            // border: OutlineInputBorder(
-                                            //   borderRadius: BorderRadius.circular(12),
-                                            // ),
-                                            contentPadding:
-                                                const EdgeInsets.symmetric(
-                                                  horizontal: 12,
-                                                ),
-                                          ),
-                                          items: provider.languages.map((lang) {
-                                            return DropdownMenuItem(
-                                              value: lang,
-                                              child: Text(lang),
-                                            );
-                                          }).toList(),
-                                          onChanged: (val) {
-                                            if (val != null) {
-                                              provider.setSourceLanguage(val);
-                                            }
-                                          },
-                                        ),
+                                      ChatInputWidget(
+                                        translationProvider: provider,
+                                        isHost: true,
                                       ),
-                                      SizedBox(width: 40),
-                                      Expanded(
-                                        child: DropdownButtonFormField<String>(
-                                          value: provider.guestLanguage,
-                                          style: TextStyle(color: Colors.black),
-                                          dropdownColor: Colors.white,
-                                          iconEnabledColor: Theme.of(
-                                            context,
-                                          ).colorScheme.secondary,
-                                          decoration: InputDecoration(
-                                            filled: true,
-                                            fillColor: Color(0xFFE9EDEBA),
-                                            enabledBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
-                                                color: Colors.transparent,
-                                              ),
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                            ),
-                                            focusedBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
-                                                color: Colors.transparent,
-                                              ),
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                            ),
-                                            // border: OutlineInputBorder(
-                                            //   borderRadius: BorderRadius.circular(12),
-                                            // ),
-                                            contentPadding:
-                                                const EdgeInsets.symmetric(
-                                                  horizontal: 12,
-                                                ),
-                                          ),
-                                          items: provider.languages.map((lang) {
-                                            return DropdownMenuItem(
-                                              value: lang,
-                                              child: Text(lang),
-                                            );
-                                          }).toList(),
-                                          onChanged: (val) {
-                                            if (val != null) {
-                                              provider.setTargetLanguage(val);
-                                            }
-                                          },
-                                        ),
-                                      ),
-                                      SizedBox(width: 10),
                                     ],
                                   ),
                                 ),
-                                Expanded(
-                                  flex: 4,
-                                  child: Container(
-                                    width: double.infinity,
-                                    constraints: const BoxConstraints(
-                                      minHeight: 140,
-                                    ),
-                                    padding: const EdgeInsets.all(14),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(14),
-                                    ),
-                                    child: SizedBox(
-                                      height: 150,
-                                      child: Stack(
-                                        children: [
-                                          // 🧠 Main Content
-                                          Positioned.fill(
-                                            child: Builder(
-                                              builder: (context) {
-                                                // 🔄 LOADING
-                                                if (provider.isLoading) {
-                                                  return const Center(
-                                                    child:
-                                                        CircularProgressIndicator(),
-                                                  );
-                                                }
-
-                                                // ❌ ERROR
-                                                if (provider.hasError) {
-                                                  return Center(
-                                                    child: Text(
-                                                      provider.errorMessage,
-                                                      style: TextStyle(
-                                                        color: Colors.red,
-                                                        fontSize: 14,
-                                                      ),
-                                                      textAlign:
-                                                          TextAlign.center,
-                                                    ),
-                                                  );
-                                                }
-
-                                                // ✅ SUCCESS / DEFAULT
-                                                return SingleChildScrollView(
-                                                  child: Text(
-                                                    provider
-                                                            .translatedText
-                                                            .isEmpty
-                                                        ? "Translated text appears here"
-                                                        : provider
-                                                              .translatedText,
-                                                    style: TextStyle(
-                                                      color: Colors.black,
-                                                      fontSize: 15,
-                                                      height: 1.4,
-                                                    ),
-                                                  ),
-                                                );
-                                              },
-                                            ),
-                                          ),
-
-                                          // 🔊 SPEAKER BUTTON
-                                          // Positioned(
-                                          //   right: 0,
-                                          //   bottom: 0,
-                                          //   child: IconButton(
-                                          //     icon: Icon(
-                                          //       provider.isSpeaking ? Icons.stop : Icons.volume_up,
-                                          //       color: Theme.of(context).colorScheme.secondary,
-                                          //     ),
-                                          //
-                                          //     // 🚨 Disable when loading or error
-                                          //     onPressed: (provider.isLoading || provider.hasError)
-                                          //         ? null
-                                          //         : () async {
-                                          //       if (provider.isSpeaking) {
-                                          //         await provider.stop();
-                                          //       } else {
-                                          //         final text = provider.translatedText.isEmpty
-                                          //             ? "Translated text appears here"
-                                          //             : provider.translatedText;
-                                          //
-                                          //         await provider.speak(text);
-                                          //       }
-                                          //     },
-                                          //   ),
-                                          // ),
-                                        ],
+                              ),
+                              Positioned(
+                                bottom: -45,
+                                left: 0,
+                                right: 0,
+                                child: SizedBox(
+                                  height: 90,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      // Center(
+                                      //   child: circleButton(
+                                      //     30,
+                                      //     30,
+                                      //     "assets/images/play.svg",
+                                      //     onTap: () {},
+                                      //   ),
+                                      // ),
+                                      // SizedBox(width: 20,),
+                                      ChatInputWidget(
+                                        translationProvider: provider,
+                                        isHost: false,
                                       ),
-                                    ),
-
-                                    // Stack(
-                                    //   children: [
-                                    //     SingleChildScrollView(
-                                    //       child: Text(
-                                    //         provider.translatedText.isEmpty
-                                    //             ? "Translated text appears here"
-                                    //             : provider.translatedText,
-                                    //         style: TextStyle(
-                                    //           color: Theme.of(context).colorScheme.secondary,
-                                    //           fontSize: 15,
-                                    //           height: 1.4,
-                                    //         ),
-                                    //       ),
-                                    //     ),
-                                    //
-                                    //     Positioned(
-                                    //       right: -10,
-                                    //       bottom: -10,
-                                    //       child: IconButton(
-                                    //         icon: Icon(
-                                    //           provider.isSpeaking
-                                    //               ? Icons.stop
-                                    //               : Icons.volume_up,
-                                    //           color: Theme.of(context).colorScheme.secondary,
-                                    //         ),
-                                    //         onPressed: () async {
-                                    //           if (provider.isSpeaking) {
-                                    //             await provider.stop();
-                                    //           } else {
-                                    //             final text = provider.translatedText.isEmpty
-                                    //                 ? "Translated text appears here"
-                                    //                 : provider.translatedText;
-                                    //             await provider.speak(text);
-                                    //           }
-                                    //         },
-                                    //       ),
-                                    //     ),
-                                    //   ],
-                                    // ),
+                                      // SizedBox(width: 20,),
+                                      // Center(
+                                      //   child: circleButton(
+                                      //     30,
+                                      //     30,
+                                      //     "assets/images/pause.svg",
+                                      //     onTap: () {},
+                                      //   ),
+                                      // ),
+                                    ],
                                   ),
                                 ),
-
-                                // ChatInputWidget(translationProvider: provider, isHost: false),
-                              ],
-                            ),
-                            Positioned(
-                              top: -50,
-                              left: 0,
-                              right: 0,
-                              child: Transform.rotate(
-                                angle: 3.1416,
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      "Gastmikrofon eingeschaltet",
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w400,
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                                  ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              SizedBox(
+                                height: 35,
+                                width: 44,
+                                child: Image.asset(
+                                  "assets/images/settings.png",
+                                  fit: BoxFit.fill,
                                 ),
                               ),
-                            ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        } else {
+          return Scaffold(
+            // backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            backgroundColor: Colors.white,
+            resizeToAvoidBottomInset: true,
+            appBar: AppBar(
+              title: Text(
+                "Translator",
+                style: TextStyle(color: Color(0xFF43B786)),
+              ),
+              actions: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pushReplacement(
+                          context,
+                          PageRouteBuilder(
+                            pageBuilder: (context, animation,
+                                secondaryAnimation) =>
+                                WelcomeScreen(),
+                            transitionsBuilder: (context, animation,
+                                secondaryAnimation, child) {
+                              const begin = Offset(1.0, 0.0); // right → left
+                              const end = Offset.zero;
+                              const curve = Curves.easeInOut;
 
-                            Positioned(
-                              top: -25,
-                              left: 0,
-                              right: 0,
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  Transform.rotate(
-                                    angle: 3.1416,
-                                    child: Center(
-                                      // child: _circleButton(30,30,Icons.pause, onTap: () {}),
-                                      child: _circleButton(
-                                        30,
-                                        30,
-                                        Icons.pause,
-                                        onTap: () {},
-                                      ),
-                                    ),
-                                  ),
-                                  Transform.rotate(
-                                    angle: 3.1416,
-                                    child: Center(
-                                      child: _circleButton(
-                                        50,
-                                        50,
-                                        Icons.mic,
-                                        onTap: () {},
-                                      ),
-                                    ),
-                                  ),
-                                  Transform.rotate(
-                                    angle: 3.1416,
-                                    child: Center(
-                                      child: _circleButton(
-                                        30,
-                                        30,
-                                        Icons.play_arrow,
-                                        onTap: () {},
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                              var tween = Tween(begin: begin, end: end).chain(
+                                CurveTween(curve: curve),
+                              );
 
-                            Positioned(
-                              bottom: -25,
-                              left: 0,
-                              right: 0,
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
+                              return SlideTransition(
+                                position: animation.drive(tween),
+                                child: child,
+                              );
+                            },
+                            transitionDuration: Duration(milliseconds: 500),
+                          ),
+                        );
+                        // Navigator.pushReplacement(
+                        //   context,
+                        //   MaterialPageRoute(builder: (_) => WelcomeScreen()),
+                        // );
+                      },
+                      child: SizedBox(
+                        height: 35,
+                        width: 44,
+                        child: SvgPicture.asset(
+                          "assets/images/close.svg",
+                          fit: BoxFit.fill,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 15),
+                  ],
+                ),
+              ],
+              centerTitle: true,
+              backgroundColor: Colors.white,
+            ),
+            body: Stack(
+              children: [
+                Container(
+                  width: double.infinity,
+                  height: double.infinity,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        const Color(0xFFFFFFFF),
+                        const Color(0xFF66BB6A).withOpacity(0.2),
+                        const Color(0xFFFFFFFF),
+                      ],
+                      stops: const [0.0, 0.4, 1.0],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
+                  ),
+                ),
+                Center(
+                  child: SizedBox(
+                    width: 800,
+                    height: 800,
+                    child: SafeArea(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 6,
+                        ),
+                        child: Column(
+                          children: [
+                            Expanded(flex: 1, child: SizedBox()),
+                            Expanded(
+                              flex: 14,
+                              child: Stack(
+                                clipBehavior: Clip.none,
                                 children: [
-                                  Center(
-                                    child: _circleButton(
-                                      30,
-                                      30,
-                                      Icons.play_arrow,
-                                      onTap: () {},
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(14),
+                                    child: CustomPaint(
+                                      size: Size(double.infinity, double.infinity),
+                                      painter: DiagonalPainter(),
                                     ),
                                   ),
                                   Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Center(
-                                        child: _circleButton(
-                                          50,
-                                          50,
-                                          Icons.mic_off,
-                                          onTap: () {},
+                                      Expanded(
+                                        flex: 6,
+                                        child: Transform.rotate(
+                                          angle: 3.1416, // 180 degrees in radians
+                                          child: Container(
+                                            width: double.infinity,
+                                            constraints: const BoxConstraints(
+                                              minHeight: 140,
+                                            ),
+                                            padding: const EdgeInsets.all(14),
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(
+                                                  14),
+                                            ),
+                                            child: SizedBox(
+                                              height: 150,
+                                              child: Stack(
+                                                children: [
+                                                  // 🧠 Main Content
+                                                  Positioned.fill(
+                                                    child: Builder(
+                                                      builder: (context) {
+                                                        // 🔄 LOADING
+                                                        // if (provider.isLoading) {
+                                                        //   return const Center(
+                                                        //     child:
+                                                        //         CircularProgressIndicator(),
+                                                        //   );
+                                                        // }
+
+                                                        // ❌ ERROR
+                                                        if (provider.hasError) {
+                                                          return Center(
+                                                            child: Text(
+                                                              provider.errorMessage,
+                                                              style: TextStyle(
+                                                                color: Colors.red,
+                                                                fontSize: 14,
+                                                              ),
+                                                              textAlign:
+                                                              TextAlign.center,
+                                                            ),
+                                                          );
+                                                        }
+
+                                                        // ✅ SUCCESS / DEFAULT
+                                                        return SingleChildScrollView(
+                                                          reverse: true,
+                                                          child: Padding(
+                                                            padding:
+                                                            const EdgeInsets.only(
+                                                              bottom: 10.0,
+                                                            ),
+                                                            child: Column(
+                                                              crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                              children: [
+
+                                                                /// 🟢 HISTORY
+                                                                ...provider.messages
+                                                                    .map((msg,) {
+                                                                  return Padding(
+                                                                    padding:
+                                                                    const EdgeInsets
+                                                                        .symmetric(
+                                                                      vertical: 4,
+                                                                    ),
+                                                                    child: Text(
+                                                                      "${msg
+                                                                          .speakerLabel} - ${msg
+                                                                          .isHost
+                                                                          ? msg
+                                                                          .originalText
+                                                                          : msg
+                                                                          .translatedText}",
+                                                                      style: TextStyle(
+                                                                        fontSize: 14,
+                                                                        fontWeight:
+                                                                        FontWeight
+                                                                            .w400,
+                                                                        color: Colors
+                                                                            .black,
+                                                                      ),
+                                                                    ),
+                                                                  );
+                                                                }),
+
+                                                                /// 🔴 LIVE TEXT
+                                                                if (provider
+                                                                    .isHostSpeaking &&
+                                                                    provider
+                                                                        .liveText
+                                                                        .isNotEmpty)
+                                                                  Text(
+                                                                    "Host - ${provider
+                                                                        .liveText}",
+                                                                    style: TextStyle(
+                                                                      fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                    ),
+                                                                  ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        );
+                                                      },
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
                                         ),
                                       ),
+                                      Expanded(
+                                        flex: 2,
+                                        child: LayoutBuilder(
+                                          builder: (context, constraints) {
+                                            return Stack(
+                                              children: [
+
+                                                /// 🔵 LEFT 50% SVG
+                                                Positioned(
+                                                  left: 0,
+                                                  top: 0,
+                                                  bottom: 0,
+                                                  width: constraints.maxWidth * 0.5,
+                                                  child: SvgPicture.asset(
+                                                    "assets/images/green_rectangle.svg",
+                                                    fit: BoxFit.fill,
+                                                  ),
+                                                ),
+
+                                                /// 🟢 RIGHT 50% SVG
+                                                Positioned(
+                                                  right: 0,
+                                                  top: 0,
+                                                  bottom: 0,
+                                                  width: constraints.maxWidth * 0.5,
+                                                  child: SvgPicture.asset(
+                                                    "assets/images/white_rectangle.svg",
+                                                    fit: BoxFit.fill,
+                                                  ),
+                                                ),
+                                                Row(
+                                                  children: [
+                                                    SizedBox(width: 8),
+                                                    Expanded(
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                        CrossAxisAlignment.start,
+                                                        children: [
+                                                          Expanded(
+                                                            child: Row(
+                                                              crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .end,
+                                                              children: [
+                                                                SizedBox(width: 15),
+                                                                Transform.rotate(
+                                                                  angle: 3.1416,
+                                                                  child: SizedBox(
+                                                                    height: 10,
+                                                                    width: 15,
+                                                                    child: Image
+                                                                        .asset(
+                                                                      "assets/images/polygon.png",
+                                                                      fit:
+                                                                      BoxFit.fill,
+                                                                      color: Color(
+                                                                        0xFFC9DED4,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                          DropdownButtonFormField<
+                                                              String
+                                                          >(
+                                                            value:
+                                                            provider.hostLanguage,
+                                                            style: TextStyle(
+                                                              color: Colors.black,
+                                                            ),
+                                                            iconSize: 0,
+                                                            dropdownColor:
+                                                            Colors.white,
+                                                            iconEnabledColor:
+                                                            Theme
+                                                                .of(context)
+                                                                .colorScheme
+                                                                .secondary,
+                                                            decoration: InputDecoration(
+                                                              filled: true,
+                                                              fillColor: Color(
+                                                                0xFFC9DED4,
+                                                              ),
+                                                              enabledBorder:
+                                                              OutlineInputBorder(
+                                                                borderSide: BorderSide(
+                                                                  color: Colors
+                                                                      .transparent,
+                                                                ),
+                                                                borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                  12,
+                                                                ),
+                                                              ),
+                                                              focusedBorder:
+                                                              OutlineInputBorder(
+                                                                borderSide: BorderSide(
+                                                                  color: Colors
+                                                                      .transparent,
+                                                                ),
+                                                                borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                  12,
+                                                                ),
+                                                              ),
+                                                              // border: OutlineInputBorder(
+                                                              //   borderRadius: BorderRadius.circular(12),
+                                                              // ),
+                                                              contentPadding:
+                                                              const EdgeInsets
+                                                                  .symmetric(
+                                                                horizontal: 12,
+                                                              ),
+                                                            ),
+                                                            items: provider
+                                                                .languages
+                                                                .reversed
+                                                                .map((lang) {
+                                                              return DropdownMenuItem(
+                                                                value: lang,
+                                                                child: Transform
+                                                                    .rotate(
+                                                                  angle: 3.1416,
+                                                                  child: Row(
+                                                                    children: [
+                                                                      Text(lang),
+                                                                      Icon(
+                                                                        Icons
+                                                                            .arrow_drop_down,
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                              );
+                                                            })
+                                                                .toList(),
+                                                            onChanged: (val) {
+                                                              if (val != null) {
+                                                                provider
+                                                                    .setSourceLanguage(
+                                                                  val,
+                                                                );
+                                                              }
+                                                            },
+                                                          ),
+                                                          Expanded(
+                                                              child: SizedBox()),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    SizedBox(width: 5),
+                                                    SizedBox(
+                                                      height: 35,
+                                                      width: 40,
+                                                      child: Image.asset(
+                                                        "assets/images/swap_button.png",
+                                                        fit: BoxFit.fill,
+                                                      ),
+                                                    ),
+                                                    SizedBox(width: 5),
+                                                    Expanded(
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                        CrossAxisAlignment.start,
+                                                        children: [
+                                                          Expanded(
+                                                              child: SizedBox()),
+                                                          DropdownButtonFormField<
+                                                              String
+                                                          >(
+                                                            value: provider
+                                                                .guestLanguage,
+                                                            style: TextStyle(
+                                                              color: Colors.black,
+                                                            ),
+                                                            dropdownColor:
+                                                            Colors.white,
+                                                            iconEnabledColor:
+                                                            Theme
+                                                                .of(context)
+                                                                .colorScheme
+                                                                .secondary,
+                                                            decoration: InputDecoration(
+                                                              filled: true,
+                                                              fillColor: Color(
+                                                                0xFFC9DED4,
+                                                              ),
+                                                              enabledBorder:
+                                                              OutlineInputBorder(
+                                                                borderSide: BorderSide(
+                                                                  color: Colors
+                                                                      .transparent,
+                                                                ),
+                                                                borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                  12,
+                                                                ),
+                                                              ),
+                                                              focusedBorder:
+                                                              OutlineInputBorder(
+                                                                borderSide: BorderSide(
+                                                                  color: Colors
+                                                                      .transparent,
+                                                                ),
+                                                                borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                  12,
+                                                                ),
+                                                              ),
+                                                              // border: OutlineInputBorder(
+                                                              //   borderRadius: BorderRadius.circular(12),
+                                                              // ),
+                                                              contentPadding:
+                                                              const EdgeInsets
+                                                                  .symmetric(
+                                                                horizontal: 12,
+                                                              ),
+                                                            ),
+                                                            items: provider
+                                                                .languages
+                                                                .map((lang) {
+                                                              return DropdownMenuItem(
+                                                                value: lang,
+                                                                child: Text(lang),
+                                                              );
+                                                            })
+                                                                .toList(),
+                                                            onChanged: (val) {
+                                                              if (val != null) {
+                                                                provider
+                                                                    .setTargetLanguage(
+                                                                  val,
+                                                                );
+                                                              }
+                                                            },
+                                                          ),
+                                                          Expanded(
+                                                            child: Row(
+                                                              crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                              children: [
+                                                                SizedBox(width: 15),
+                                                                SizedBox(
+                                                                  height: 10,
+                                                                  width: 15,
+                                                                  child: Image
+                                                                      .asset(
+                                                                    "assets/images/polygon.png",
+                                                                    fit: BoxFit
+                                                                        .fill,
+                                                                    color: Color(
+                                                                      0xFFC9DED4,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    SizedBox(width: 8),
+                                                  ],
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                      Expanded(
+                                        flex: 6,
+                                        child: Container(
+                                          width: double.infinity,
+                                          constraints: const BoxConstraints(
+                                            minHeight: 140,
+                                          ),
+                                          padding: const EdgeInsets.all(14),
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(14),
+                                          ),
+                                          child: SizedBox(
+                                            height: 150,
+                                            child: Stack(
+                                              children: [
+                                                // 🧠 Main Content
+                                                Positioned.fill(
+                                                  child: Builder(
+                                                    builder: (context) {
+                                                      // 🔄 LOADING
+                                                      // if (provider.isLoading) {
+                                                      //   return const Center(
+                                                      //     child:
+                                                      //         CircularProgressIndicator(),
+                                                      //   );
+                                                      // }
+
+                                                      // ❌ ERROR
+                                                      if (provider.hasError) {
+                                                        return Center(
+                                                          child: Text(
+                                                            provider.errorMessage,
+                                                            style: TextStyle(
+                                                              color: Colors.red,
+                                                              fontSize: 14,
+                                                            ),
+                                                            textAlign:
+                                                            TextAlign.center,
+                                                          ),
+                                                        );
+                                                      }
+
+                                                      // ✅ SUCCESS / DEFAULT
+                                                      return SingleChildScrollView(
+                                                        reverse: true,
+                                                        child: Padding(
+                                                          padding:
+                                                          const EdgeInsets.only(
+                                                            bottom: 10.0,
+                                                          ),
+                                                          child: Column(
+                                                            crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                            children: [
+
+                                                              /// 🟢 HISTORY
+                                                              ...provider.messages
+                                                                  .map((msg,) {
+                                                                return Padding(
+                                                                  padding:
+                                                                  const EdgeInsets
+                                                                      .symmetric(
+                                                                    vertical: 4,
+                                                                  ),
+                                                                  child: Text(
+                                                                    "${msg
+                                                                        .speakerLabel} - ${msg
+                                                                        .isHost
+                                                                        ? msg
+                                                                        .translatedText
+                                                                        : msg
+                                                                        .originalText}",
+                                                                    style: TextStyle(
+                                                                      fontSize: 14,
+                                                                      fontWeight:
+                                                                      FontWeight
+                                                                          .w400,
+                                                                      color: Colors
+                                                                          .black,
+                                                                    ),
+                                                                  ),
+                                                                );
+                                                              }),
+
+                                                              /// 🔴 LIVE TEXT
+                                                              if (!provider
+                                                                  .isHostSpeaking &&
+                                                                  provider
+                                                                      .liveText
+                                                                      .isNotEmpty)
+                                                                Text(
+                                                                  "Guest - ${provider
+                                                                      .liveText}",
+                                                                  style: TextStyle(
+                                                                    fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                    color:
+                                                                    Colors.black,
+                                                                  ),
+                                                                ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      );
+                                                      // return SingleChildScrollView(
+                                                      //   child: Text(
+                                                      //     provider
+                                                      //             .translatedText
+                                                      //             .isEmpty
+                                                      //         ? "Translated text appears here"
+                                                      //         : provider
+                                                      //               .translatedText,
+                                                      //     style: TextStyle(
+                                                      //       color: Colors.black,
+                                                      //       fontSize: 15,
+                                                      //       height: 1.4,
+                                                      //     ),
+                                                      //   ),
+                                                      // );
+                                                    },
+                                                  ),
+                                                ),
+
+                                                // 🔊 SPEAKER BUTTON
+                                                // Positioned(
+                                                //   right: 0,
+                                                //   bottom: 0,
+                                                //   child: IconButton(
+                                                //     icon: Icon(
+                                                //       provider.isSpeaking ? Icons.stop : Icons.volume_up,
+                                                //       color: Theme.of(context).colorScheme.secondary,
+                                                //     ),
+                                                //
+                                                //     // 🚨 Disable when loading or error
+                                                //     onPressed: (provider.isLoading || provider.hasError)
+                                                //         ? null
+                                                //         : () async {
+                                                //       if (provider.isSpeaking) {
+                                                //         await provider.stop();
+                                                //       } else {
+                                                //         final text = provider.translatedText.isEmpty
+                                                //             ? "Translated text appears here"
+                                                //             : provider.translatedText;
+                                                //
+                                                //         await provider.speak(text);
+                                                //       }
+                                                //     },
+                                                //   ),
+                                                // ),
+                                              ],
+                                            ),
+                                          ),
+
+                                          // Stack(
+                                          //   children: [
+                                          //     SingleChildScrollView(
+                                          //       child: Text(
+                                          //         provider.translatedText.isEmpty
+                                          //             ? "Translated text appears here"
+                                          //             : provider.translatedText,
+                                          //         style: TextStyle(
+                                          //           color: Theme.of(context).colorScheme.secondary,
+                                          //           fontSize: 15,
+                                          //           height: 1.4,
+                                          //         ),
+                                          //       ),
+                                          //     ),
+                                          //
+                                          //     Positioned(
+                                          //       right: -10,
+                                          //       bottom: -10,
+                                          //       child: IconButton(
+                                          //         icon: Icon(
+                                          //           provider.isSpeaking
+                                          //               ? Icons.stop
+                                          //               : Icons.volume_up,
+                                          //           color: Theme.of(context).colorScheme.secondary,
+                                          //         ),
+                                          //         onPressed: () async {
+                                          //           if (provider.isSpeaking) {
+                                          //             await provider.stop();
+                                          //           } else {
+                                          //             final text = provider.translatedText.isEmpty
+                                          //                 ? "Translated text appears here"
+                                          //                 : provider.translatedText;
+                                          //             await provider.speak(text);
+                                          //           }
+                                          //         },
+                                          //       ),
+                                          //     ),
+                                          //   ],
+                                          // ),
+                                        ),
+                                      ),
+
+                                      // ChatInputWidget(translationProvider: provider, isHost: false),
                                     ],
                                   ),
-                                  Center(
-                                    child: _circleButton(
-                                      30,
-                                      30,
-                                      Icons.pause,
-                                      onTap: () {},
+                                  Positioned(
+                                    top: -35,
+                                    left: 0,
+                                    right: 0,
+                                    child: SizedBox(
+                                      height: 90,
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          ChatInputWidget(
+                                            translationProvider: provider,
+                                            isHost: true,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    bottom: -35,
+                                    left: 0,
+                                    right: 0,
+                                    child: SizedBox(
+                                      height: 90,
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          ChatInputWidget(
+                                            translationProvider: provider,
+                                            isHost: false,
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                            Positioned(
-                              bottom: -50,
-                              left: 0,
-                              right: 0,
-                              child: Column(
+                            Expanded(
+                              flex: 2,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
-                                  Text(
-                                    "Host Mic Off",
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w400,
-                                      color: Colors.black,
+                                  SizedBox(
+                                    height: 35,
+                                    width: 44,
+                                    child: Image.asset(
+                                      "assets/images/settings.png",
+                                      fit: BoxFit.fill,
                                     ),
                                   ),
                                 ],
@@ -539,49 +1559,17 @@ class _TranslationScreenState extends State<TranslationScreen> {
                           ],
                         ),
                       ),
-                      Expanded(flex: 2, child: SizedBox()),
-                    ],
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        );
+              ],
+            ),
+          );
+        }
       },
     );
   }
 
-  Widget _circleButton(
-    double height,
-    double width,
-    IconData icon, {
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: height,
-        width: width,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          shape: BoxShape.circle,
-          boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black26)],
-        ),
-        child: Icon(icon, color: Colors.black),
-      ),
-    );
-  }
-
-  Widget _buildTextWidget(String value, BuildContext context) {
-    return Text(
-      value,
-      style: TextStyle(
-        fontSize: 14,
-        fontWeight: FontWeight.w600,
-        color: Theme.of(context).colorScheme.primary,
-      ),
-    );
-  }
 }
 
 class ActiveThemeButton extends StatelessWidget {
@@ -655,11 +1643,11 @@ class DiagonalPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final greenPaint = Paint()
-      ..color = Colors.green.shade300
+      ..color = Color(0xFF8AD8B7)
       ..style = PaintingStyle.fill;
 
     final whitePaint = Paint()
-      ..color = Colors.white
+      ..color = Color(0xFFF3F3F3)
       ..style = PaintingStyle.fill;
 
     // 🔷 GREEN PART (Top side)

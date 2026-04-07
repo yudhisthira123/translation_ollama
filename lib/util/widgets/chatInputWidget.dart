@@ -22,6 +22,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
     with SingleTickerProviderStateMixin {
   final TextEditingController messageController = TextEditingController();
   late stt.SpeechToText _speech;
+
   bool _isListening = false;
   String _lastWords = "";
   bool _speechEnabled = false;
@@ -49,7 +50,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
             print("Speech error: $error");
 
             if (error.errorMsg.contains("network")) {
-              showError(context,"⚠️ Internet required for speech");
+              showError(context, "⚠️ Internet required for speech");
               _stopListening();
               return;
             }
@@ -71,6 +72,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
     _hasInternet = await hasInternet();
     setState(() {});
   }
+
   void _onSpeechStatus(String status) {
     /// Android timeout (~10 sec)
     if (status == "done" && _isListening) {
@@ -134,12 +136,12 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
     final internet = await hasInternet();
 
     if (!internet) {
-      showError(context,"⚠️ No internet connection");
+      showError(context, "⚠️ No internet connection");
       return;
     }
 
     if (!_speech.isAvailable) {
-      showError(context,"⚠️ Speech not available");
+      showError(context, "⚠️ Speech not available");
       return;
     }
     // if (!_speech.isAvailable) {
@@ -156,6 +158,10 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
       onResult: (val) {
         if (!_isListening) return;
 
+        final text = val.recognizedWords;
+
+        /// 🔥 ALWAYS SHOW LIVE TEXT
+        widget.translationProvider.updateLiveText(text, isHost: widget.isHost);
         if (val.finalResult) {
           /// append only final confirmed words
           _lastWords = "$_lastWords ${val.recognizedWords}".trim();
@@ -205,7 +211,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
     final internet = await hasInternet();
 
     if (!internet) {
-      showError(context,"⚠️ No internet. Cannot translate.");
+      showError(context, "⚠️ No internet. Cannot translate.");
       return;
     }
 
@@ -228,62 +234,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: 550),
-        child: Container(
-          width: 550, // Given 550 so that it will look good on web also.
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-          decoration: BoxDecoration(
-            color: Theme.of(context).secondaryHeaderColor,
-            borderRadius: BorderRadius.circular(40),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.15),
-                blurRadius: 10,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: messageController,
-                  onChanged: widget.translationProvider.setInputText,
-                  style: const TextStyle(color: Colors.grey),
-                  decoration: InputDecoration(
-                    hintText: "Type a message...",
-                    hintStyle: const TextStyle(color: Colors.grey),
-                    filled: true,
-                    // fillColor: const Color(0xFF2C2C2C),
-                    fillColor: Theme.of(context).cardColor,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                  textInputAction: TextInputAction.send,
-                  onSubmitted: (value) {
-                    if (value.trim().isNotEmpty) {
-                      _sendMessage();
-                    }
-                  },
-                ),
-              ),
-              const SizedBox(width: 5),
-              _buildSendButton(), // SEND BUTTON
-              const SizedBox(width: 5),
-              _buildMicButton(), // MIC BUTTON
-            ],
-          ),
-        ),
-      ),
-    );
+    return Center(child: _buildMicButton(widget.isHost));
   }
 
   @override
@@ -304,44 +255,161 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
       child: IconButton(
         icon: const Icon(Icons.send, color: Colors.white),
         onPressed: !_hasInternet
-            ? () => showError(context,"No internet")
-            :_sendMessage,
+            ? () => showError(context, "No internet")
+            : _sendMessage,
       ),
     );
   }
 
-  Widget _buildMicButton() {
-    return GestureDetector(
-      onTap: !_hasInternet
-          ? () => showError(context,"No internet")
-          : () {
-        if (_isListening) {
-          _stopListening();
-        } else {
-          _startListening();
-        }
-      },
-      child: AnimatedBuilder(
-        animation: _micAnimationController,
-        builder: (context, child) {
-          return Transform.scale(
-            scale: _isListening ? _micAnimation.value : 1,
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: _isListening
-                    ? Theme.of(context).primaryColor
-                    : Colors.transparent,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                _isListening ? Icons.mic : Icons.mic_none,
-                color: Colors.white,
-              ),
+  Widget _buildMicButton(bool isHost) {
+    return AnimatedBuilder(
+      animation: _micAnimationController,
+      builder: (context, child) {
+        return Center(
+          child: Container(
+            // color:Colors.redAccent,
+            child: Column(
+              children: [
+                if (isHost)
+                  Transform.rotate(
+                    angle: 3.1416,
+                    child: Text(
+                      // "Gastmikrofon eingeschaltet",
+                      "",
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                if (!isHost) SizedBox(height: 20),
+                Row(
+                  children: [
+                    // if (isHost) ...[
+                    //   Transform.rotate(
+                    //     angle: 3.1416,
+                    //     child: circleButton(
+                    //       30,
+                    //       30,
+                    //       "assets/images/pause.svg",
+                    //       onTap: () {
+                    //         print("Tapped pause");
+                    //       },
+                    //     ),
+                    //   ),
+                    //   SizedBox(width: 30),
+                    // ],
+                    // if (!isHost) ...[
+                    //   circleButton(
+                    //     30,
+                    //     30,
+                    //     "assets/images/play.svg",
+                    //     onTap: () {
+                    //       print("Tapped play");
+                    //     },
+                    //   ),
+                    //   SizedBox(width: 30),
+                    // ],
+                    Transform.rotate(
+                      angle: isHost ? 3.1416 : 0,
+                      child: circleButton(
+                        50,
+                        50,
+                        _isListening
+                            ? "assets/images/mic_on.svg"
+                            : "assets/images/mic_off.svg",
+                        onTap: !_hasInternet
+                            ? () => showError(context, "No internet")
+                            : () async {
+                                if (_isListening) {
+                                  _stopListening();
+                                  await _sendMessage();
+                                } else {
+                                  _startListening();
+                                }
+
+                                /// 🔥 FORCE UI UPDATE
+                                setState(() {});
+                              },
+                      ),
+                    ),
+                    // if (!isHost) ...[
+                    //   SizedBox(width: 30),
+                    //   circleButton(
+                    //     30,
+                    //     30,
+                    //     "assets/images/pause.svg",
+                    //     onTap: () {
+                    //       print("Tapped pause");
+                    //     },
+                    //   ),
+                    // ],
+                    // if (isHost) ...[
+                    //   SizedBox(width: 30),
+                    //   Transform.rotate(
+                    //     angle: 3.1416,
+                    //     child: circleButton(
+                    //       30,
+                    //       30,
+                    //       "assets/images/play.svg",
+                    //       onTap: () {
+                    //         print("Tapped play");
+                    //       },
+                    //     ),
+                    //   ),
+                    // ],
+                  ],
+                ),
+                if (isHost) SizedBox(height: 20),
+                if (!isHost)
+                  Text(
+                    // "Host Mic Off",
+                    "",
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.black,
+                    ),
+                  ),
+              ],
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
+    // return GestureDetector(
+    //   onTap: !_hasInternet
+    //       ? () => showError(context,"No internet")
+    //       : () {
+    //     if (_isListening) {
+    //       _stopListening();
+    //       _sendMessage();
+    //     } else {
+    //       _startListening();
+    //     }
+    //   },
+    //   child: AnimatedBuilder(
+    //     animation: _micAnimationController,
+    //     builder: (context, child) {
+    //       return Transform.scale(
+    //         scale: _isListening ? _micAnimation.value : 1,
+    //         child: Container(
+    //           padding: const EdgeInsets.all(10),
+    //           decoration: BoxDecoration(
+    //             color: _isListening
+    //                 ? Theme.of(context).primaryColor
+    //                 : Colors.transparent,
+    //             shape: BoxShape.circle,
+    //           ),
+    //           child: Icon(
+    //             _isListening ? Icons.mic : Icons.mic_none,
+    //             color: Colors.white,
+    //           ),
+    //         ),
+    //       );
+    //     },
+    //   ),
+    // );
   }
 }
