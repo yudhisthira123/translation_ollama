@@ -169,14 +169,26 @@ Widget circleButton(
     String icon, {
       required VoidCallback onTap,
     }) {
+  final bool isMicOn = icon == "assets/images/mic_on.svg";
+
   return GestureDetector(
     onTap: onTap,
     child: SizedBox(
       height: height,
       width: width,
-      child: SvgPicture.asset(
-        icon, // your first SVG
-        fit: BoxFit.fill,
+      child: Center(
+        child: isMicOn
+            ? Transform.rotate(
+          angle: 3.1416,
+          child: SvgPicture.asset(
+            icon,
+            fit: BoxFit.fill,
+          ),
+        )
+            : SvgPicture.asset(
+          icon,
+          fit: BoxFit.fill,
+        ),
       ),
     ),
   );

@@ -58,6 +58,27 @@ class TranslationProvider extends ChangeNotifier {
   final FlutterTts flutterTts = FlutterTts();
   bool isSpeaking = false;
 
+  double volume = 0.5;
+  double pitch = 0.5;
+  double rate = 0.5;
+
+  void setVolume(double v) {
+    volume = v.clamp(0.1, 1.0);
+    volume = v;
+    notifyListeners();
+  }
+
+  void setPitch(double v) {
+    pitch = v;
+    notifyListeners();
+  }
+
+  void setRate(double v) {
+    rate = v;
+    notifyListeners();
+  }
+
+
   TranslationProvider() {
     flutterTts.setCompletionHandler(() {
       isSpeaking = false;
@@ -284,8 +305,13 @@ class TranslationProvider extends ChangeNotifier {
     if (text.isEmpty) return;
 
     await flutterTts.setLanguage( languageCodes[_speechLanguage] ?? 'en'); // change if needed
-    await flutterTts.setPitch(1.0);
-    await flutterTts.setSpeechRate(0.5);
+
+    await flutterTts.setVolume(volume.clamp(0.1, 1.0));
+    await flutterTts.setPitch(0.5 + (pitch * 1.5));
+    await flutterTts.setSpeechRate(0.3 + (rate * 0.7));
+    // await flutterTts.setVolume(1.0);
+    // await flutterTts.setPitch(1.0);
+    // await flutterTts.setSpeechRate(0.5);
 
     isSpeaking = true;
     notifyListeners();

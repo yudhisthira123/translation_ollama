@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
@@ -32,7 +34,6 @@ class _TranslationScreenState extends State<TranslationScreen> {
       builder: (context, provider, child) {
         if (Responsive.isMobile(context)) {
           return Scaffold(
-            // backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             backgroundColor: Colors.white,
             resizeToAvoidBottomInset: true,
             appBar: AppBar(
@@ -251,7 +252,8 @@ class _TranslationScreenState extends State<TranslationScreen> {
                                     ),
                                   ),
                                   Expanded(
-                                    flex: 2,
+                                    // flex: 2,
+                                    flex: MediaQuery.of(context).size.height < 500 ? 5 : 2,
                                     child: LayoutBuilder(
                                       builder: (context, constraints) {
                                         return Stack(
@@ -786,12 +788,17 @@ class _TranslationScreenState extends State<TranslationScreen> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                              SizedBox(
-                                height: 35,
-                                width: 44,
-                                child: Image.asset(
-                                  "assets/images/settings.png",
-                                  fit: BoxFit.fill,
+                              GestureDetector(
+                                onTap: (){
+                                  showSettingsDialog(context);
+                                },
+                                child: SizedBox(
+                                  height: 35,
+                                  width: 44,
+                                  child: Image.asset(
+                                    "assets/images/settings.png",
+                                    fit: BoxFit.fill,
+                                  ),
                                 ),
                               ),
                             ],
@@ -1028,7 +1035,8 @@ class _TranslationScreenState extends State<TranslationScreen> {
                                         ),
                                       ),
                                       Expanded(
-                                        flex: 2,
+                                        // flex: 2,
+                                        flex: MediaQuery.of(context).size.height < 500 ? 5 : 2,
                                         child: LayoutBuilder(
                                           builder: (context, constraints) {
                                             return Stack(
@@ -1545,12 +1553,17 @@ class _TranslationScreenState extends State<TranslationScreen> {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
-                                  SizedBox(
-                                    height: 35,
-                                    width: 44,
-                                    child: Image.asset(
-                                      "assets/images/settings.png",
-                                      fit: BoxFit.fill,
+                                  GestureDetector(
+                                    onTap: (){
+                                      showSettingsDialog(context);
+                                    },
+                                    child: SizedBox(
+                                      height: 35,
+                                      width: 44,
+                                      child: Image.asset(
+                                        "assets/images/settings.png",
+                                        fit: BoxFit.fill,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -1570,6 +1583,259 @@ class _TranslationScreenState extends State<TranslationScreen> {
     );
   }
 
+}
+
+
+void showSettingsDialog(BuildContext context) {
+  final provider = Provider.of<TranslationProvider>(context, listen: false);
+
+  showGeneralDialog(
+    context: context,
+    barrierDismissible: true,
+    barrierLabel: "Settings",
+    barrierColor: Colors.transparent,
+    transitionDuration: const Duration(milliseconds: 300),
+    pageBuilder: (context, animation, secondaryAnimation) {
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return Stack(
+            children: [
+              // 🔥 Blur Background
+              BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                child: Container(
+                  color: Colors.black.withOpacity(0.2),
+                ),
+              ),
+
+              // Dialog UI
+              Center(
+                child: Material(
+                  color: Colors.transparent,
+                  child: SingleChildScrollView(
+                    child: Container(
+                      width: Responsive.isMobile(context) ? MediaQuery.of(context).size.width * 0.85 : 700,
+                      // width: MediaQuery.of(context).size.width * 0.85,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 10,
+                          )
+                        ],
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Header
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                "SETTING",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF424242),
+                                  fontSize: 16
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: () => Navigator.pop(context),
+                                child: const CircleAvatar(
+                                  radius: 14,
+                                  child: Icon(Icons.close, size: 16),
+                                ),
+                              )
+                            ],
+                          ),
+                    
+                          const SizedBox(height: 45),
+                    
+                          // 🔊 Volume
+                          buildSlider(
+                            context: context,
+                            title: "VOLUME",
+                            icon: "assets/images/volume_icon.png",
+                            value: provider.volume,
+                            onChanged: (v) {
+                              provider.setVolume(v);
+                              setState(() => provider.volume = v);
+                            },
+                          ),
+                    
+                          const SizedBox(height: 10),
+                    
+                          // 🎵 Pitch
+                          buildSlider(
+                            context: context,
+                            title: "PITCH",
+                            icon: "assets/images/pitch_icon.png",
+                            value: provider.pitch,
+                            onChanged: (v) {
+                              provider.setPitch(v);
+                              setState(() => provider.pitch = v);
+                            },
+                          ),
+                    
+                          const SizedBox(height: 10),
+                    
+                          // 🎙 Rate
+                          buildSlider(
+                            context: context,
+                            title: "RATE OF VOICE",
+                            icon: "assets/images/mic_icon.png",
+                            value: provider.rate,
+                            onChanged: (v) {
+                              provider.setRate(v);
+                              setState(() => provider.rate = v);
+                            },
+                          ),
+                          const SizedBox(height: 45),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
+}
+
+Widget buildSlider({
+  required BuildContext context,
+  required String title,
+  required String icon,
+  required double value,
+  required Function(double) onChanged,
+}) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 10),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            SizedBox(
+              height: 15 ,
+              width: 15,
+              child: Image
+                  .asset(
+                icon,
+                fit:
+                BoxFit.fill,
+              ),
+            ),
+            SizedBox(width: 10,),
+            Text(
+              title,
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: Color(0xFF424242)
+              ),
+            ),
+          ],
+        ),
+        Column(
+          children: [
+            SliderTheme(
+              data: SliderTheme.of(context).copyWith(
+                trackHeight: 3,
+                thumbShape: RectangularThumbShape(width: 12, height: 26),
+                overlayShape: SliderComponentShape.noOverlay,
+                activeTrackColor: Color(0xFFD9D9D9),
+                inactiveTrackColor: Color(0xFFD9D9D9),
+                thumbColor: Color(0xFF6F7773),
+              ),
+              child: Slider(
+                  padding: EdgeInsets.symmetric(vertical: 8,horizontal: 0),
+              value: value,
+                min: 0,
+                max: 1,
+                onChanged: onChanged,
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  "Min",
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w400,
+                      fontSize: 10,
+                      color: Color(0xFF424242)
+                  ),
+                ),
+                const Text(
+                    "Max",
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w400,
+                      fontSize: 10,
+                      color: Color(0xFF424242)
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
+}
+
+class RectangularThumbShape extends SliderComponentShape {
+  final double width;
+  final double height;
+
+  const RectangularThumbShape({
+    this.width = 12,
+    this.height = 26,
+  });
+
+  @override
+  Size getPreferredSize(bool isEnabled, bool isDiscrete) {
+    return Size(width, height);
+  }
+
+  @override
+  void paint(
+      PaintingContext context,
+      Offset center, {
+        required Animation<double> activationAnimation,
+        required Animation<double> enableAnimation,
+        required bool isDiscrete,
+        required TextPainter labelPainter,
+        required RenderBox parentBox,
+        required SliderThemeData sliderTheme,
+        required TextDirection textDirection,
+        required double value,
+        required double textScaleFactor,
+        required Size sizeWithOverflow,
+      }) {
+    final Canvas canvas = context.canvas;
+
+    final rect = Rect.fromCenter(
+      center: center,
+      width: width,
+      height: height,
+    );
+
+    final paint = Paint()
+      ..color = sliderTheme.thumbColor ?? Colors.black
+      ..style = PaintingStyle.fill;
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(rect, Radius.circular(4)),
+      paint,
+    );
+  }
 }
 
 class ActiveThemeButton extends StatelessWidget {
