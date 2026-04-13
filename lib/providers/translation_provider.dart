@@ -304,14 +304,30 @@ class TranslationProvider extends ChangeNotifier {
   Future<void> speak(String text) async {
     if (text.isEmpty) return;
 
-    await flutterTts.setLanguage( languageCodes[_speechLanguage] ?? 'en'); // change if needed
+    await flutterTts.setLanguage( languageCodes[_speechLanguage] ?? 'en');
 
     await flutterTts.setVolume(volume.clamp(0.1, 1.0));
     await flutterTts.setPitch(0.5 + (pitch * 1.5));
-    await flutterTts.setSpeechRate(0.3 + (rate * 0.7));
-    // await flutterTts.setVolume(1.0);
-    // await flutterTts.setPitch(1.0);
-    // await flutterTts.setSpeechRate(0.5);
+    // await flutterTts.setSpeechRate(0.3 + (rate * 0.7));
+
+    double speechRate;
+    if (Platform.isIOS) {
+      speechRate = 0.2 + (rate * 0.3);
+    } else {
+      speechRate = 0.3 + (rate * 0.7);
+    }
+
+    await flutterTts.setSpeechRate(speechRate);
+
+    if (Platform.isIOS) {
+      await flutterTts.setIosAudioCategory(
+        IosTextToSpeechAudioCategory.playback,
+        [
+          IosTextToSpeechAudioCategoryOptions.mixWithOthers,
+        ],
+      );
+    }
+
 
     isSpeaking = true;
     notifyListeners();

@@ -8,7 +8,6 @@ import 'providers/translation_provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
-  // runApp(const MyApp());
   runApp(
       ChangeNotifierProvider(
         create: (_) => ThemeProvider(),
@@ -36,9 +35,7 @@ class MyApp extends StatelessWidget {
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
-        // home: const TranslationScreen(),
         home: WelcomeScreen(),
-        // home: LoginScreen(),
       ),
     );
   }
