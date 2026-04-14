@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:translation/screens/welcome_screen.dart';
 import '../apptheme/apptheme.dart';
 import '../apptheme/theme_provider.dart';
+import '../constants.dart';
 import '../providers/translation_provider.dart';
 import '../responsive/responsive.dart';
 import '../util/widgets/chatInputWidget.dart';
@@ -38,7 +39,7 @@ class _TranslationScreenState extends State<TranslationScreen> {
             resizeToAvoidBottomInset: true,
             appBar: AppBar(
               title: Text(
-                "Translator",
+                AppStrings.get(context, 'translator').toUpperCase(),
                 style: TextStyle(color: Color(0xFF43B786)),
               ),
               actions: [
@@ -55,7 +56,7 @@ class _TranslationScreenState extends State<TranslationScreen> {
                                 WelcomeScreen(),
                             transitionsBuilder: (context, animation,
                                 secondaryAnimation, child) {
-                              const begin = Offset(1.0, 0.0); // right → left
+                              const begin = Offset(-1.0, 0.0); // left → right
                               const end = Offset.zero;
                               const curve = Curves.easeInOut;
 
@@ -68,13 +69,9 @@ class _TranslationScreenState extends State<TranslationScreen> {
                                 child: child,
                               );
                             },
-                            transitionDuration: Duration(milliseconds: 500),
+                            transitionDuration: Duration(milliseconds: 100),
                           ),
                         );
-                        // Navigator.pushReplacement(
-                        //   context,
-                        //   MaterialPageRoute(builder: (_) => WelcomeScreen()),
-                        // );
                       },
                       child: SizedBox(
                         height: 35,
@@ -754,28 +751,10 @@ class _TranslationScreenState extends State<TranslationScreen> {
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      // Center(
-                                      //   child: circleButton(
-                                      //     30,
-                                      //     30,
-                                      //     "assets/images/play.svg",
-                                      //     onTap: () {},
-                                      //   ),
-                                      // ),
-                                      // SizedBox(width: 20,),
                                       ChatInputWidget(
                                         translationProvider: provider,
                                         isHost: false,
                                       ),
-                                      // SizedBox(width: 20,),
-                                      // Center(
-                                      //   child: circleButton(
-                                      //     30,
-                                      //     30,
-                                      //     "assets/images/pause.svg",
-                                      //     onTap: () {},
-                                      //   ),
-                                      // ),
                                     ],
                                   ),
                                 ),
@@ -813,12 +792,11 @@ class _TranslationScreenState extends State<TranslationScreen> {
           );
         } else {
           return Scaffold(
-            // backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             backgroundColor: Colors.white,
             resizeToAvoidBottomInset: true,
             appBar: AppBar(
               title: Text(
-                "Translator",
+                AppStrings.get(context, 'translator').toUpperCase(),
                 style: TextStyle(color: Color(0xFF43B786)),
               ),
               actions: [
@@ -835,7 +813,7 @@ class _TranslationScreenState extends State<TranslationScreen> {
                                 WelcomeScreen(),
                             transitionsBuilder: (context, animation,
                                 secondaryAnimation, child) {
-                              const begin = Offset(1.0, 0.0); // right → left
+                              const begin = Offset(-1.0, 0.0); // left → right
                               const end = Offset.zero;
                               const curve = Curves.easeInOut;
 
@@ -848,13 +826,9 @@ class _TranslationScreenState extends State<TranslationScreen> {
                                 child: child,
                               );
                             },
-                            transitionDuration: Duration(milliseconds: 500),
+                            transitionDuration: Duration(milliseconds: 100),
                           ),
                         );
-                        // Navigator.pushReplacement(
-                        //   context,
-                        //   MaterialPageRoute(builder: (_) => WelcomeScreen()),
-                        // );
                       },
                       child: SizedBox(
                         height: 35,
@@ -1634,9 +1608,10 @@ void showSettingsDialog(BuildContext context) {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
-                                "SETTING",
-                                style: TextStyle(
+                              Text(
+                                // "SETTING",
+                                AppStrings.get(context, 'setting').toUpperCase(),
+                                style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: Color(0xFF424242),
                                   fontSize: 16
@@ -1657,7 +1632,7 @@ void showSettingsDialog(BuildContext context) {
                           // 🔊 Volume
                           buildSlider(
                             context: context,
-                            title: "VOLUME",
+                            title: AppStrings.get(context, 'volume').toUpperCase(),
                             icon: "assets/images/volume_icon.png",
                             value: provider.volume,
                             onChanged: (v) {
@@ -1671,7 +1646,7 @@ void showSettingsDialog(BuildContext context) {
                           // 🎵 Pitch
                           buildSlider(
                             context: context,
-                            title: "PITCH",
+                            title: AppStrings.get(context, 'pitch').toUpperCase(),
                             icon: "assets/images/pitch_icon.png",
                             value: provider.pitch,
                             onChanged: (v) {
@@ -1685,7 +1660,7 @@ void showSettingsDialog(BuildContext context) {
                           // 🎙 Rate
                           buildSlider(
                             context: context,
-                            title: "RATE OF VOICE",
+                            title: AppStrings.get(context, 'rateOfVoice').toUpperCase(),
                             icon: "assets/images/mic_icon.png",
                             value: provider.rate,
                             onChanged: (v) {
@@ -1765,16 +1740,16 @@ Widget buildSlider({
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  "Min",
+                Text(
+                  AppStrings.get(context, 'min'),
                   style: const TextStyle(
                       fontWeight: FontWeight.w400,
                       fontSize: 10,
                       color: Color(0xFF424242)
                   ),
                 ),
-                const Text(
-                    "Max",
+                Text(
+                  AppStrings.get(context, 'max'),
                   style: const TextStyle(
                       fontWeight: FontWeight.w400,
                       fontSize: 10,

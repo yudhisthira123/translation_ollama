@@ -23,7 +23,9 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
   final TextEditingController messageController = TextEditingController();
   late stt.SpeechToText _speech;
 
-  bool _isListening = false;
+  // bool _isListening = false;
+  bool get _isListening => widget.translationProvider.activeMic ==  (widget.isHost ? ActiveMic.host : ActiveMic.guest);
+
   String _lastWords = "";
   bool _speechEnabled = false;
   late AnimationController _micAnimationController;
@@ -130,7 +132,12 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
   }
 
   void _startListening() async {
+
     widget.translationProvider.setSpeechLanguage(widget.isHost);
+
+    // 🔥 STOP TTS (fix crash)
+    await widget.translationProvider.stop();
+    await Future.delayed(const Duration(milliseconds: 300));
 
     // 🔴 INTERNET CHECK
     final internet = await hasInternet();
@@ -152,7 +159,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
       _lastWords = messageController.text; // ✅ keep existing text
     }
 
-    setState(() => _isListening = true);
+    // setState(() => _isListening = true);
     _micAnimationController.repeat(reverse: true);
     _speech.listen(
       onResult: (val) {
@@ -199,7 +206,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
   }
 
   void _stopListening() {
-    setState(() => _isListening = false);
+    // setState(() => _isListening = false);
     _micAnimationController.stop();
     _micAnimationController.reset();
     _speech.stop();
@@ -322,16 +329,52 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
                         onTap: !_hasInternet
                             ? () => showError(context, "No internet")
                             : () async {
-                                if (_isListening) {
-                                  _stopListening();
-                                  await _sendMessage();
-                                } else {
-                                  _startListening();
-                                }
+                          final provider = widget.translationProvider;
 
-                                /// 🔥 FORCE UI UPDATE
-                                setState(() {});
-                              },
+                          final requestedMic =
+                          widget.isHost ? ActiveMic.host : ActiveMic.guest;
+
+                          final isSameMic = provider.activeMic == requestedMic;
+
+                          // 🔥 STOP EVERYTHING FIRST
+                          await provider.stop(); // stop TTS
+                          await _speech.stop();
+
+                          await Future.delayed(const Duration(milliseconds: 300));
+
+                          if (isSameMic) {
+                            // 👉 STOP
+                            // provider.activeMic = ActiveMic.none;
+                            // provider.notifyListeners();
+
+                            provider.stopMic();
+
+                            _stopListening();
+                            await _sendMessage();
+                          } else {
+                            _resetForNewMic();
+                            // 👉 SWITCH MIC
+
+                            provider.setActiveMic(requestedMic);
+                            // provider.activeMic = requestedMic;
+                            // provider.notifyListeners();
+
+                            _startListening();
+                          }
+                        },
+                        // onTap: !_hasInternet
+                        //     ? () => showError(context, "No internet")
+                        //     : () async {
+                        //         if (_isListening) {
+                        //           _stopListening();
+                        //           await _sendMessage();
+                        //         } else {
+                        //           _startListening();
+                        //         }
+                        //
+                        //         /// 🔥 FORCE UI UPDATE
+                        //         setState(() {});
+                        //       },
                       ),
                     ),
                     // if (!isHost) ...[
@@ -378,38 +421,13 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
         );
       },
     );
-    // return GestureDetector(
-    //   onTap: !_hasInternet
-    //       ? () => showError(context,"No internet")
-    //       : () {
-    //     if (_isListening) {
-    //       _stopListening();
-    //       _sendMessage();
-    //     } else {
-    //       _startListening();
-    //     }
-    //   },
-    //   child: AnimatedBuilder(
-    //     animation: _micAnimationController,
-    //     builder: (context, child) {
-    //       return Transform.scale(
-    //         scale: _isListening ? _micAnimation.value : 1,
-    //         child: Container(
-    //           padding: const EdgeInsets.all(10),
-    //           decoration: BoxDecoration(
-    //             color: _isListening
-    //                 ? Theme.of(context).primaryColor
-    //                 : Colors.transparent,
-    //             shape: BoxShape.circle,
-    //           ),
-    //           child: Icon(
-    //             _isListening ? Icons.mic : Icons.mic_none,
-    //             color: Colors.white,
-    //           ),
-    //         ),
-    //       );
-    //     },
-    //   ),
-    // );
+  }
+  void _resetForNewMic() {
+    _lastWords = "";
+
+    messageController.clear();
+
+    widget.translationProvider.setInputText("");
+    widget.translationProvider.updateLiveText("", isHost: widget.isHost);
   }
 }

@@ -5,9 +5,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:http/http.dart' as http;
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../util/model/message_model.dart';
 
 enum TranslationStatus { idle, loading, success, error }
+enum ActiveMic { none, host, guest }
 
 class TranslationProvider extends ChangeNotifier {
 
@@ -36,6 +38,7 @@ class TranslationProvider extends ChangeNotifier {
     "Japanese": "ja"
   };
 
+
   /// 🔥 NEW STATE (IMPORTANT)
   List<Message> messages = [];
   String liveText = "";
@@ -62,6 +65,18 @@ class TranslationProvider extends ChangeNotifier {
   double pitch = 0.5;
   double rate = 0.5;
 
+  bool isListening = false;
+  ActiveMic activeMic = ActiveMic.none;
+
+  void setActiveMic(ActiveMic mic) {
+    activeMic = mic;
+    notifyListeners();
+  }
+  void stopMic() {
+    activeMic = ActiveMic.none;
+    notifyListeners();
+  }
+
   void setVolume(double v) {
     volume = v.clamp(0.1, 1.0);
     volume = v;
@@ -78,6 +93,31 @@ class TranslationProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> switchMic(bool isHost, stt.SpeechToText speech) async {
+    ActiveMic requestedMic = isHost ? ActiveMic.host : ActiveMic.guest;
+
+    // 🔥 Stop everything first (IMPORTANT)
+    await stop();
+
+    await speech.stop();
+
+    // small delay for iOS stability
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    // 👉 if same mic → just stop
+    if (activeMic == requestedMic && isListening) {
+      activeMic = ActiveMic.none;
+      isListening = false;
+      notifyListeners();
+      return;
+    }
+
+    // 👉 switch mic
+    activeMic = requestedMic;
+    isListening = true;
+
+    notifyListeners();
+  }
 
   TranslationProvider() {
     flutterTts.setCompletionHandler(() {
@@ -151,6 +191,7 @@ class TranslationProvider extends ChangeNotifier {
 
   /// 🔥 IMPORTANT (who is speaking)
   void setSpeechLanguage(bool isHost) {
+    print("isHost : $isHost");
     _speechLanguage = isHost ? guestLanguage : hostLanguage;
 
     isHostSpeaking = isHost;
@@ -314,7 +355,7 @@ class TranslationProvider extends ChangeNotifier {
     if (Platform.isIOS) {
       speechRate = 0.2 + (rate * 0.3);
     } else {
-      speechRate = 0.3 + (rate * 0.7);
+      speechRate = 0.3 + (rate * 0.6);
     }
 
     await flutterTts.setSpeechRate(speechRate);

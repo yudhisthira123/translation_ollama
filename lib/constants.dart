@@ -45,7 +45,13 @@ class AppStrings {
       'skip': 'Skip',
       'main': 'Main Screen',
       'translator': 'Translator',
-      'translate': 'Translate'
+      'translate': 'Translate',
+      'setting': 'Setting',
+      'volume': 'Volume',
+      'pitch': 'Pitch',
+      'rateOfVoice': 'Rate of Voice',
+      'min': 'Min',
+      'max': 'Max'
     },
 
     'hi': {
@@ -57,7 +63,13 @@ class AppStrings {
       'skip': 'स्किप करें',
       'main': 'मुख्य स्क्रीन',
       'translator': 'अनुवादक',
-      'translate': 'अनुवाद करें'
+      'translate': 'अनुवाद करें',
+      'setting': 'सेटिंग',
+      'volume': 'आवाज़',
+      'pitch': 'पिच',
+      'rateOfVoice': 'आवाज़ की गति',
+      'min': 'न्यूनतम',
+      'max': 'अधिकतम'
     },
 
     'de': {
@@ -69,7 +81,13 @@ class AppStrings {
       'skip': 'Überspringen',
       'main': 'Startbildschirm',
       'translator': 'Übersetzer',
-      'translate': 'Übersetzen'
+      'translate': 'Übersetzen',
+      'setting': 'Einstellungen',
+      'volume': 'Lautstärke',
+      'pitch': 'Tonhöhe',
+      'rateOfVoice': 'Sprechgeschwindigkeit',
+      'min': 'Min',
+      'max': 'Max'
     },
 
     'es': {
@@ -81,7 +99,13 @@ class AppStrings {
       'skip': 'Saltar',
       'main': 'Pantalla principal',
       'translator': 'Traductor',
-      'translate': 'Traducir'
+      'translate': 'Traducir',
+      'setting': 'Configuración',
+      'volume': 'Volumen',
+      'pitch': 'Tono',
+      'rateOfVoice': 'Velocidad de voz',
+      'min': 'Mín',
+      'max': 'Máx'
     },
 
     'fr': {
@@ -91,9 +115,14 @@ class AppStrings {
       'invalid': 'Identifiants invalides',
       'welcome': 'Bienvenue dans votre expérience de traduction plus intelligente !\nAppuyez ci-dessous pour commencer',
       'skip': 'Passer',
-      'main': 'Écran principal',
-      'translator': 'Traducteur',
-      'translate': 'Traduire'
+      'main': 'Écran principal','translator': 'Traducteur',
+      'translate': 'Traduire',
+      'setting': 'Paramètres',
+      'volume': 'Volume',
+      'pitch': 'Hauteur',
+      'rateOfVoice': 'Vitesse de la voix',
+      'min': 'Min',
+      'max': 'Max'
     },
 
     'nl': {
@@ -105,7 +134,13 @@ class AppStrings {
       'skip': 'Overslaan',
       'main': 'Hoofdscherm',
       'translator': 'Vertaler',
-      'translate': 'Vertalen'
+      'translate': 'Vertalen',
+      'setting': 'Instellingen',
+      'volume': 'Volume',
+      'pitch': 'Toonhoogte',
+      'rateOfVoice': 'Spreeksnelheid',
+      'min': 'Min',
+      'max': 'Max'
     },
 
     'ru': {
@@ -117,7 +152,13 @@ class AppStrings {
       'skip': 'Пропустить',
       'main': 'Главный экран',
       'translator': 'Переводчик',
-      'translate': 'Перевести'
+      'translate': 'Перевести',
+      'setting': 'Настройки',
+      'volume': 'Громкость',
+      'pitch': 'Высота тона',
+      'rateOfVoice': 'Скорость речи',
+      'min': 'Мин',
+      'max': 'Макс'
     },
 
     'pt': {
@@ -129,7 +170,13 @@ class AppStrings {
       'skip': 'Pular',
       'main': 'Tela principal',
       'translator': 'Tradutor',
-      'translate': 'Traduzir'
+      'translate': 'Traduzir',
+      'setting': 'Configurações',
+      'volume': 'Volume',
+      'pitch': 'Tom',
+      'rateOfVoice': 'Velocidade da fala',
+      'min': 'Mín',
+      'max': 'Máx'
     },
 
     'ja': {
@@ -141,7 +188,13 @@ class AppStrings {
       'skip': 'スキップ',
       'main': 'メイン画面',
       'translator': '翻訳者',
-      'translate': '翻訳する'
+      'translate': '翻訳する',
+      'setting': '設定',
+      'volume': '音量',
+      'pitch': 'ピッチ',
+      'rateOfVoice': '話速',
+      'min': '最小',
+      'max': '最大'
     },
   };
 

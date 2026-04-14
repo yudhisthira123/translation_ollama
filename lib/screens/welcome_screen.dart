@@ -109,17 +109,29 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     'ja': 'ja-JP',
   };
 
+  bool _isSpeaking = false;
+
+
   Future speak() async {
     String lang = Localizations.localeOf(context).languageCode;
+
+    _isSpeaking = true;
 
     await tts.setLanguage(ttsLang[lang] ?? 'en-US');
     await tts.speak(AppStrings.get(context, 'welcome'));
 
     tts.setCompletionHandler(() {
+      _isSpeaking = false;
       goNext();
     });
   }
-
+  void onSkip() async {
+    if (_isSpeaking) {
+      await tts.stop(); // 🔥 this stops speech immediately
+      _isSpeaking = false;
+    }
+    goNext();
+  }
   void goNext() {
     Navigator.pushReplacement(
       context,
@@ -143,10 +155,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         transitionDuration: Duration(milliseconds: 500),
       ),
     );
-    // Navigator.pushReplacement(
-    //   context,
-    //   MaterialPageRoute(builder: (_) => TranslationScreen()),
-    // );
   }
 
   @override
@@ -316,9 +324,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                               ],
                             ),
                             child: ElevatedButton.icon(
-                              onPressed: goNext,
+                              onPressed: onSkip,
                               label: Text(
-                                "Skip",
+                                AppStrings.get(context, 'skip'),
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w400,
@@ -513,7 +521,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                               ],
                             ),
                             child: ElevatedButton.icon(
-                              onPressed: goNext,
+                              onPressed: onSkip,
                               label: Text(
                                 "Skip",
                                 style: const TextStyle(
