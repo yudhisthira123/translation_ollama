@@ -117,7 +117,7 @@ class _TranslationScreenState extends State<TranslationScreen> {
                       children: [
                         Expanded(flex: 1, child: SizedBox()),
                         Expanded(
-                          flex: 14,
+                          flex: 20,
                           child: Stack(
                             clipBehavior: Clip.none,
                             children: [
@@ -181,9 +181,7 @@ class _TranslationScreenState extends State<TranslationScreen> {
                                                       reverse: true,
                                                       child: Padding(
                                                         padding:
-                                                        const EdgeInsets.only(
-                                                          bottom: 10.0,
-                                                        ),
+                                                        EdgeInsets.only(left: 14,right: 14,top: 10, bottom: 30),
                                                         child: Column(
                                                           crossAxisAlignment:
                                                           CrossAxisAlignment
@@ -234,6 +232,18 @@ class _TranslationScreenState extends State<TranslationScreen> {
                                                                       .bold,
                                                                   color: Colors.black
                                                                 ),
+                                                              ),
+
+                                                            /// 🟢 LOADER (SHOW IN HOST BOX WHEN GUEST IS SPEAKING)
+                                                            if (!provider.isHostSpeaking && provider.isTranslating)
+                                                              Row(
+                                                                children: [
+                                                                  Image.asset(
+                                                                    "assets/images/dot.gif",
+                                                                    height: 37,
+                                                                    width: 56,
+                                                                  ),
+                                                                ],
                                                               ),
                                                           ],
                                                         ),
@@ -532,7 +542,7 @@ class _TranslationScreenState extends State<TranslationScreen> {
                                       constraints: const BoxConstraints(
                                         minHeight: 140,
                                       ),
-                                      padding: const EdgeInsets.all(14),
+                                      padding: const EdgeInsets.only(left: 14,right: 14,top: 10, bottom: 30),
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(14),
                                       ),
@@ -627,102 +637,26 @@ class _TranslationScreenState extends State<TranslationScreen> {
                                                                 Colors.black,
                                                               ),
                                                             ),
+
+                                                          /// 🟢 LOADER (SHOW IN GUEST BOX WHEN HOST IS SPEAKING)
+                                                          if (provider.isHostSpeaking && provider.isTranslating)
+                                                            Image.asset(
+                                                              "assets/images/dot.gif",
+                                                              height: 37,
+                                                              width: 56,
+                                                            ),
                                                         ],
                                                       ),
                                                     ),
                                                   );
-                                                  // return SingleChildScrollView(
-                                                  //   child: Text(
-                                                  //     provider
-                                                  //             .translatedText
-                                                  //             .isEmpty
-                                                  //         ? "Translated text appears here"
-                                                  //         : provider
-                                                  //               .translatedText,
-                                                  //     style: TextStyle(
-                                                  //       color: Colors.black,
-                                                  //       fontSize: 15,
-                                                  //       height: 1.4,
-                                                  //     ),
-                                                  //   ),
-                                                  // );
                                                 },
                                               ),
                                             ),
-
-                                            // 🔊 SPEAKER BUTTON
-                                            // Positioned(
-                                            //   right: 0,
-                                            //   bottom: 0,
-                                            //   child: IconButton(
-                                            //     icon: Icon(
-                                            //       provider.isSpeaking ? Icons.stop : Icons.volume_up,
-                                            //       color: Theme.of(context).colorScheme.secondary,
-                                            //     ),
-                                            //
-                                            //     // 🚨 Disable when loading or error
-                                            //     onPressed: (provider.isLoading || provider.hasError)
-                                            //         ? null
-                                            //         : () async {
-                                            //       if (provider.isSpeaking) {
-                                            //         await provider.stop();
-                                            //       } else {
-                                            //         final text = provider.translatedText.isEmpty
-                                            //             ? "Translated text appears here"
-                                            //             : provider.translatedText;
-                                            //
-                                            //         await provider.speak(text);
-                                            //       }
-                                            //     },
-                                            //   ),
-                                            // ),
                                           ],
                                         ),
                                       ),
-
-                                      // Stack(
-                                      //   children: [
-                                      //     SingleChildScrollView(
-                                      //       child: Text(
-                                      //         provider.translatedText.isEmpty
-                                      //             ? "Translated text appears here"
-                                      //             : provider.translatedText,
-                                      //         style: TextStyle(
-                                      //           color: Theme.of(context).colorScheme.secondary,
-                                      //           fontSize: 15,
-                                      //           height: 1.4,
-                                      //         ),
-                                      //       ),
-                                      //     ),
-                                      //
-                                      //     Positioned(
-                                      //       right: -10,
-                                      //       bottom: -10,
-                                      //       child: IconButton(
-                                      //         icon: Icon(
-                                      //           provider.isSpeaking
-                                      //               ? Icons.stop
-                                      //               : Icons.volume_up,
-                                      //           color: Theme.of(context).colorScheme.secondary,
-                                      //         ),
-                                      //         onPressed: () async {
-                                      //           if (provider.isSpeaking) {
-                                      //             await provider.stop();
-                                      //           } else {
-                                      //             final text = provider.translatedText.isEmpty
-                                      //                 ? "Translated text appears here"
-                                      //                 : provider.translatedText;
-                                      //             await provider.speak(text);
-                                      //           }
-                                      //         },
-                                      //       ),
-                                      //     ),
-                                      //   ],
-                                      // ),
                                     ),
                                   ),
-
-                                  // ChatInputWidget(translationProvider: provider, isHost: false),
                                 ],
                               ),
                               Positioned(
@@ -730,7 +664,7 @@ class _TranslationScreenState extends State<TranslationScreen> {
                                 left: 0,
                                 right: 0,
                                 child: SizedBox(
-                                  height: 90,
+                                  height: 110,
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
@@ -747,7 +681,7 @@ class _TranslationScreenState extends State<TranslationScreen> {
                                 left: 0,
                                 right: 0,
                                 child: SizedBox(
-                                  height: 90,
+                                  height: 110,
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
@@ -993,7 +927,20 @@ class _TranslationScreenState extends State<TranslationScreen> {
                                                                       fontWeight:
                                                                       FontWeight
                                                                           .bold,
+                                                                      color: Colors.black
                                                                     ),
+                                                                  ),
+
+                                                                /// 🟢 LOADER (SHOW IN HOST BOX WHEN GUEST IS SPEAKING)
+                                                                if (!provider.isHostSpeaking && provider.isTranslating)
+                                                                  Row(
+                                                                    children: [
+                                                                      Image.asset(
+                                                                        "assets/images/dot.gif",
+                                                                        height: 56,
+                                                                        width: 80,
+                                                                      ),
+                                                                    ],
                                                                   ),
                                                               ],
                                                             ),
@@ -1387,98 +1334,25 @@ class _TranslationScreenState extends State<TranslationScreen> {
                                                                     Colors.black,
                                                                   ),
                                                                 ),
+
+                                                              /// 🟢 LOADER (SHOW IN GUEST BOX WHEN HOST IS SPEAKING)
+                                                              if (provider.isHostSpeaking && provider.isTranslating)
+                                                                Image.asset(
+                                                                  "assets/images/dot.gif",
+                                                                  height: 56,
+                                                                  width: 80,
+                                                                ),
                                                             ],
                                                           ),
                                                         ),
                                                       );
-                                                      // return SingleChildScrollView(
-                                                      //   child: Text(
-                                                      //     provider
-                                                      //             .translatedText
-                                                      //             .isEmpty
-                                                      //         ? "Translated text appears here"
-                                                      //         : provider
-                                                      //               .translatedText,
-                                                      //     style: TextStyle(
-                                                      //       color: Colors.black,
-                                                      //       fontSize: 15,
-                                                      //       height: 1.4,
-                                                      //     ),
-                                                      //   ),
-                                                      // );
                                                     },
                                                   ),
                                                 ),
 
-                                                // 🔊 SPEAKER BUTTON
-                                                // Positioned(
-                                                //   right: 0,
-                                                //   bottom: 0,
-                                                //   child: IconButton(
-                                                //     icon: Icon(
-                                                //       provider.isSpeaking ? Icons.stop : Icons.volume_up,
-                                                //       color: Theme.of(context).colorScheme.secondary,
-                                                //     ),
-                                                //
-                                                //     // 🚨 Disable when loading or error
-                                                //     onPressed: (provider.isLoading || provider.hasError)
-                                                //         ? null
-                                                //         : () async {
-                                                //       if (provider.isSpeaking) {
-                                                //         await provider.stop();
-                                                //       } else {
-                                                //         final text = provider.translatedText.isEmpty
-                                                //             ? "Translated text appears here"
-                                                //             : provider.translatedText;
-                                                //
-                                                //         await provider.speak(text);
-                                                //       }
-                                                //     },
-                                                //   ),
-                                                // ),
                                               ],
                                             ),
                                           ),
-
-                                          // Stack(
-                                          //   children: [
-                                          //     SingleChildScrollView(
-                                          //       child: Text(
-                                          //         provider.translatedText.isEmpty
-                                          //             ? "Translated text appears here"
-                                          //             : provider.translatedText,
-                                          //         style: TextStyle(
-                                          //           color: Theme.of(context).colorScheme.secondary,
-                                          //           fontSize: 15,
-                                          //           height: 1.4,
-                                          //         ),
-                                          //       ),
-                                          //     ),
-                                          //
-                                          //     Positioned(
-                                          //       right: -10,
-                                          //       bottom: -10,
-                                          //       child: IconButton(
-                                          //         icon: Icon(
-                                          //           provider.isSpeaking
-                                          //               ? Icons.stop
-                                          //               : Icons.volume_up,
-                                          //           color: Theme.of(context).colorScheme.secondary,
-                                          //         ),
-                                          //         onPressed: () async {
-                                          //           if (provider.isSpeaking) {
-                                          //             await provider.stop();
-                                          //           } else {
-                                          //             final text = provider.translatedText.isEmpty
-                                          //                 ? "Translated text appears here"
-                                          //                 : provider.translatedText;
-                                          //             await provider.speak(text);
-                                          //           }
-                                          //         },
-                                          //       ),
-                                          //     ),
-                                          //   ],
-                                          // ),
                                         ),
                                       ),
 
@@ -1486,11 +1360,11 @@ class _TranslationScreenState extends State<TranslationScreen> {
                                     ],
                                   ),
                                   Positioned(
-                                    top: -35,
+                                    top: -45,
                                     left: 0,
                                     right: 0,
                                     child: SizedBox(
-                                      height: 90,
+                                      height: 110,
                                       child: Row(
                                         mainAxisAlignment: MainAxisAlignment.center,
                                         children: [
@@ -1503,11 +1377,11 @@ class _TranslationScreenState extends State<TranslationScreen> {
                                     ),
                                   ),
                                   Positioned(
-                                    bottom: -35,
+                                    bottom: -45,
                                     left: 0,
                                     right: 0,
                                     child: SizedBox(
-                                      height: 90,
+                                      height: 110,
                                       child: Row(
                                         mainAxisAlignment: MainAxisAlignment.center,
                                         children: [

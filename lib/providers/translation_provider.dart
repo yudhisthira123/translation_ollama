@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:http/http.dart' as http;
@@ -9,10 +10,10 @@ import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../util/model/message_model.dart';
 
 enum TranslationStatus { idle, loading, success, error }
+
 enum ActiveMic { none, host, guest }
 
 class TranslationProvider extends ChangeNotifier {
-
   /// 🌍 Languages
   final List<String> languages = [
     "English",
@@ -23,7 +24,7 @@ class TranslationProvider extends ChangeNotifier {
     "Dutch",
     "Russian",
     "Portuguese",
-    "Japanese"
+    "Japanese",
   ];
 
   final Map<String, String> languageCodes = {
@@ -35,14 +36,14 @@ class TranslationProvider extends ChangeNotifier {
     "Dutch": "nl",
     "Russian": "ru",
     "Portuguese": "pt",
-    "Japanese": "ja"
+    "Japanese": "ja",
   };
-
 
   /// 🔥 NEW STATE (IMPORTANT)
   List<Message> messages = [];
   String liveText = "";
   bool isHostSpeaking = true;
+  bool isTranslating = false;
 
   /// 🔤 Languages
   String _hostLanguage = "German";
@@ -72,6 +73,7 @@ class TranslationProvider extends ChangeNotifier {
     activeMic = mic;
     notifyListeners();
   }
+
   void stopMic() {
     activeMic = ActiveMic.none;
     notifyListeners();
@@ -144,7 +146,6 @@ class TranslationProvider extends ChangeNotifier {
   late String _speechLanguage = _guestLanguage;
 
   String get speechLanguage => _speechLanguage;
-
 
   /// 🌍 Default language
   String getLanguageFromLocale(Locale locale) {
@@ -227,27 +228,29 @@ class TranslationProvider extends ChangeNotifier {
       notifyListeners();
       return;
     }
+    isTranslating = true;
+    notifyListeners();
 
     _status = TranslationStatus.loading;
     _errorMessage = "";
     notifyListeners();
 
     final url = Uri.parse(
-        "https://simpra.azurewebsites.net/Translation/Translate"
+      "https://simpra.azurewebsites.net/Translation/Translate",
     );
 
     try {
-      final response = await http.post(
-        url,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: jsonEncode({
-          "fromLanguage": languageCodes[_sourceLanguage],
-          "toLanguage": languageCodes[_targetLanguage],
-          "textToBeTranslate": _inputText,
-        }),
-      ).timeout(const Duration(seconds: 10));
+      final response = await http
+          .post(
+            url,
+            headers: {"Content-Type": "application/json"},
+            body: jsonEncode({
+              "fromLanguage": languageCodes[_sourceLanguage],
+              "toLanguage": languageCodes[_targetLanguage],
+              "textToBeTranslate": _inputText,
+            }),
+          )
+          .timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         try {
@@ -256,10 +259,12 @@ class TranslationProvider extends ChangeNotifier {
           if (data is List &&
               data.isNotEmpty &&
               data[0]["translations"] != null) {
-            _translatedText =
-                data[0]["translations"][0]["text"].toString();
+            isTranslating = false;
+            notifyListeners();
 
-            // /// 🔥 ADD MESSAGE TO HISTORY
+            _translatedText = data[0]["translations"][0]["text"].toString();
+
+            /// 🔥 ADD MESSAGE TO HISTORY
             messages.add(
               Message(
                 originalText: _inputText,
@@ -271,18 +276,10 @@ class TranslationProvider extends ChangeNotifier {
             // Speaking the translated text
             speak(_translatedText);
 
-            /// 🔥 ADD MESSAGE FIRST (IMPORTANT)
-            // messages.insert(
-            //   0,
-            //   Message(
-            //     originalText: _inputText,
-            //     translatedText: _translatedText,
-            //     isHost: isHostSpeaking,
-            //   ),
-            // );
 
             /// 🔥 NOW CLEAR LIVE TEXT
             liveText = "";
+
             /// 🔥 CLEAR LIVE TEXT
             liveText = "";
 
@@ -295,42 +292,33 @@ class TranslationProvider extends ChangeNotifier {
           _status = TranslationStatus.error;
         }
       }
-
       // ❌ CLIENT ERROR (400–499)
-      else if (response.statusCode >= 400 &&
-          response.statusCode < 500) {
-        _errorMessage =
-        "⚠️ Request error (${response.statusCode})";
+      else if (response.statusCode >= 400 && response.statusCode < 500) {
+        _errorMessage = "⚠️ Request error (${response.statusCode})";
         _status = TranslationStatus.error;
       }
-
       // ❌ SERVER ERROR (500+)
       else {
         _errorMessage = "⚠️ Server error. Try again later.";
         _status = TranslationStatus.error;
       }
     }
-
     // ⏱ TIMEOUT
     on TimeoutException {
       _errorMessage = "⚠️ Request timed out";
       _status = TranslationStatus.error;
     }
-
     // 🌐 NO INTERNET
     on SocketException {
       _errorMessage = "⚠️ No internet connection";
       _status = TranslationStatus.error;
     }
-
     // 🌍 FLUTTER WEB (CORS / blocked)
     on http.ClientException catch (e) {
-      _errorMessage =
-      "⚠️ Network error (CORS / blocked request)";
+      _errorMessage = "⚠️ Network error (CORS / blocked request)";
       _status = TranslationStatus.error;
       print("ClientException: $e");
     }
-
     // ❌ UNKNOWN ERROR
     catch (e) {
       _errorMessage = "⚠️ Something went wrong";
@@ -341,18 +329,20 @@ class TranslationProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 🔊 SPEAK
+
   Future<void> speak(String text) async {
     if (text.isEmpty) return;
 
-    await flutterTts.setLanguage( languageCodes[_speechLanguage] ?? 'en');
+    await flutterTts.setLanguage(languageCodes[_speechLanguage] ?? 'en');
 
     await flutterTts.setVolume(volume.clamp(0.1, 1.0));
     await flutterTts.setPitch(0.5 + (pitch * 1.5));
-    // await flutterTts.setSpeechRate(0.3 + (rate * 0.7));
 
     double speechRate;
-    if (Platform.isIOS) {
+
+    if (kIsWeb) {
+      speechRate = 0.3 + (rate * 0.6);
+    } else if (defaultTargetPlatform == TargetPlatform.iOS) {
       speechRate = 0.2 + (rate * 0.3);
     } else {
       speechRate = 0.3 + (rate * 0.6);
@@ -360,20 +350,22 @@ class TranslationProvider extends ChangeNotifier {
 
     await flutterTts.setSpeechRate(speechRate);
 
-    if (Platform.isIOS) {
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
       await flutterTts.setIosAudioCategory(
         IosTextToSpeechAudioCategory.playback,
-        [
-          IosTextToSpeechAudioCategoryOptions.mixWithOthers,
-        ],
+        [IosTextToSpeechAudioCategoryOptions.mixWithOthers],
       );
     }
-
 
     isSpeaking = true;
     notifyListeners();
 
     await flutterTts.speak(text);
+
+    flutterTts.setCompletionHandler(() {
+      isSpeaking = false;
+      notifyListeners();
+    });
   }
 
   Future<void> stop() async {

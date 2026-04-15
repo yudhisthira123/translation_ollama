@@ -321,10 +321,10 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
                     Transform.rotate(
                       angle: isHost ? 3.1416 : 0,
                       child: circleButton(
-                        50,
-                        50,
+                        70,
+                        70,
                         _isListening
-                            ? "assets/images/mic_on.svg"
+                            ? "assets/images/mic_on.gif"
                             : "assets/images/mic_off.svg",
                         onTap: !_hasInternet
                             ? () => showError(context, "No internet")

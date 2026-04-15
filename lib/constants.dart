@@ -216,31 +216,81 @@ void showError(BuildContext context,String message) {
   );
 }
 
+// Widget circleButton(
+//     double height,
+//     double width,
+//     String icon, {
+//       required VoidCallback onTap,
+//     }) {
+//   final bool isMicOn = icon == "assets/images/mic_on.gif";
+//
+//   return GestureDetector(
+//     onTap: onTap,
+//     child: SizedBox(
+//       height: height,
+//       width: width,
+//       child: Center(
+//         child: isMicOn ?
+//         Image.asset(
+//           "assets/images/mic_on.gif",
+//           fit: BoxFit.fill,
+//         )
+//         //     ? Transform.rotate(
+//         //   angle: 3.1416,
+//         //   child: SvgPicture.asset(
+//         //     icon,
+//         //     fit: BoxFit.fill,
+//         //   ),
+//         // )
+//             : SvgPicture.asset(
+//           icon,
+//           fit: BoxFit.fill,
+//         ),
+//       ),
+//     ),
+//   );
+// }
+
 Widget circleButton(
     double height,
     double width,
     String icon, {
       required VoidCallback onTap,
     }) {
-  final bool isMicOn = icon == "assets/images/mic_on.svg";
+  final bool isMicOn = icon == "assets/images/mic_on.gif";
 
   return GestureDetector(
     onTap: onTap,
-    child: SizedBox(
+    child: Container(
       height: height,
       width: width,
-      child: Center(
-        child: isMicOn
-            ? Transform.rotate(
-          angle: 3.1416,
-          child: SvgPicture.asset(
-            icon,
-            fit: BoxFit.fill,
+      padding: isMicOn ? const EdgeInsets.all(8) : null,
+      decoration: isMicOn ? BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.white, // optional background
+        border: Border.all(
+          color: isMicOn ? Colors.green : Colors.grey,
+          width: 3,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            spreadRadius: 1,
           ),
-        )
-            : SvgPicture.asset(
-          icon,
-          fit: BoxFit.fill,
+        ],
+      ) : null,
+      child: ClipOval(
+        child: Center(
+          child: isMicOn
+              ? Image.asset(
+            "assets/images/mic_on.gif",
+            fit: BoxFit.contain,
+          )
+              : SvgPicture.asset(
+            icon,
+            fit: BoxFit.contain,
+          ),
         ),
       ),
     ),
