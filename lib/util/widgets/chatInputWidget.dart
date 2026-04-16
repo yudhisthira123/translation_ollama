@@ -273,141 +273,13 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
       animation: _micAnimationController,
       builder: (context, child) {
         return Center(
-          child: Container(
-            // color:Colors.redAccent,
-            child: Column(
-              children: [
-                if (isHost)
-                  Transform.rotate(
-                    angle: 3.1416,
-                    child: Text(
-                      // "Gastmikrofon eingeschaltet",
-                      "",
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                if (!isHost) SizedBox(height: 20),
-                Row(
-                  children: [
-                    // if (isHost) ...[
-                    //   Transform.rotate(
-                    //     angle: 3.1416,
-                    //     child: circleButton(
-                    //       30,
-                    //       30,
-                    //       "assets/images/pause.svg",
-                    //       onTap: () {
-                    //         print("Tapped pause");
-                    //       },
-                    //     ),
-                    //   ),
-                    //   SizedBox(width: 30),
-                    // ],
-                    // if (!isHost) ...[
-                    //   circleButton(
-                    //     30,
-                    //     30,
-                    //     "assets/images/play.svg",
-                    //     onTap: () {
-                    //       print("Tapped play");
-                    //     },
-                    //   ),
-                    //   SizedBox(width: 30),
-                    // ],
-                    Transform.rotate(
-                      angle: isHost ? 3.1416 : 0,
-                      child: circleButton(
-                        70,
-                        70,
-                        _isListening
-                            ? "assets/images/mic_on.gif"
-                            : "assets/images/mic_off.svg",
-                        onTap: !_hasInternet
-                            ? () => showError(context, "No internet")
-                            : () async {
-                          final provider = widget.translationProvider;
-
-                          final requestedMic =
-                          widget.isHost ? ActiveMic.host : ActiveMic.guest;
-
-                          final isSameMic = provider.activeMic == requestedMic;
-
-                          // 🔥 STOP EVERYTHING FIRST
-                          await provider.stop(); // stop TTS
-                          await _speech.stop();
-
-                          await Future.delayed(const Duration(milliseconds: 300));
-
-                          if (isSameMic) {
-                            // 👉 STOP
-                            // provider.activeMic = ActiveMic.none;
-                            // provider.notifyListeners();
-
-                            provider.stopMic();
-
-                            _stopListening();
-                            await _sendMessage();
-                          } else {
-                            _resetForNewMic();
-                            // 👉 SWITCH MIC
-
-                            provider.setActiveMic(requestedMic);
-                            // provider.activeMic = requestedMic;
-                            // provider.notifyListeners();
-
-                            _startListening();
-                          }
-                        },
-                        // onTap: !_hasInternet
-                        //     ? () => showError(context, "No internet")
-                        //     : () async {
-                        //         if (_isListening) {
-                        //           _stopListening();
-                        //           await _sendMessage();
-                        //         } else {
-                        //           _startListening();
-                        //         }
-                        //
-                        //         /// 🔥 FORCE UI UPDATE
-                        //         setState(() {});
-                        //       },
-                      ),
-                    ),
-                    // if (!isHost) ...[
-                    //   SizedBox(width: 30),
-                    //   circleButton(
-                    //     30,
-                    //     30,
-                    //     "assets/images/pause.svg",
-                    //     onTap: () {
-                    //       print("Tapped pause");
-                    //     },
-                    //   ),
-                    // ],
-                    // if (isHost) ...[
-                    //   SizedBox(width: 30),
-                    //   Transform.rotate(
-                    //     angle: 3.1416,
-                    //     child: circleButton(
-                    //       30,
-                    //       30,
-                    //       "assets/images/play.svg",
-                    //       onTap: () {
-                    //         print("Tapped play");
-                    //       },
-                    //     ),
-                    //   ),
-                    // ],
-                  ],
-                ),
-                if (isHost) SizedBox(height: 20),
-                if (!isHost)
-                  Text(
-                    // "Host Mic Off",
+          child: Column(
+            children: [
+              if (isHost)
+                Transform.rotate(
+                  angle: 3.1416,
+                  child: Text(
+                    // "Gastmikrofon eingeschaltet",
                     "",
                     style: TextStyle(
                       fontSize: 12,
@@ -415,8 +287,133 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
                       color: Colors.black,
                     ),
                   ),
-              ],
-            ),
+                ),
+              if (!isHost) SizedBox(height: 20),
+              Row(
+                children: [
+                  // if (isHost) ...[
+                  //   Transform.rotate(
+                  //     angle: 3.1416,
+                  //     child: circleButton(
+                  //       30,
+                  //       30,
+                  //       "assets/images/pause.svg",
+                  //       onTap: () {
+                  //         print("Tapped pause");
+                  //       },
+                  //     ),
+                  //   ),
+                  //   SizedBox(width: 30),
+                  // ],
+                  // if (!isHost) ...[
+                  //   circleButton(
+                  //     30,
+                  //     30,
+                  //     "assets/images/play.svg",
+                  //     onTap: () {
+                  //       print("Tapped play");
+                  //     },
+                  //   ),
+                  //   SizedBox(width: 30),
+                  // ],
+                  Transform.rotate(
+                    angle: isHost ? 3.1416 : 0,
+                    child: circleButton(
+                      50,
+                      50,
+                      _isListening
+                          ? "assets/images/mic_on.gif"
+                          : "assets/images/mic_off.svg",
+                      onTap: !_hasInternet
+                          ? () => showError(context, "No internet")
+                          : () async {
+                        final provider = widget.translationProvider;
+
+                        final requestedMic =
+                        widget.isHost ? ActiveMic.host : ActiveMic.guest;
+
+                        final isSameMic = provider.activeMic == requestedMic;
+
+                        // 🔥 STOP EVERYTHING FIRST
+                        await provider.stop(); // stop TTS
+                        await _speech.stop();
+
+                        await Future.delayed(const Duration(milliseconds: 300));
+
+                        if (isSameMic) {
+                          // 👉 STOP
+                          // provider.activeMic = ActiveMic.none;
+                          // provider.notifyListeners();
+
+                          provider.stopMic();
+
+                          _stopListening();
+                          await _sendMessage();
+                        } else {
+                          _resetForNewMic();
+                          // 👉 SWITCH MIC
+
+                          provider.setActiveMic(requestedMic);
+                          // provider.activeMic = requestedMic;
+                          // provider.notifyListeners();
+
+                          _startListening();
+                        }
+                      },
+                      // onTap: !_hasInternet
+                      //     ? () => showError(context, "No internet")
+                      //     : () async {
+                      //         if (_isListening) {
+                      //           _stopListening();
+                      //           await _sendMessage();
+                      //         } else {
+                      //           _startListening();
+                      //         }
+                      //
+                      //         /// 🔥 FORCE UI UPDATE
+                      //         setState(() {});
+                      //       },
+                    ),
+                  ),
+                  // if (!isHost) ...[
+                  //   SizedBox(width: 30),
+                  //   circleButton(
+                  //     30,
+                  //     30,
+                  //     "assets/images/pause.svg",
+                  //     onTap: () {
+                  //       print("Tapped pause");
+                  //     },
+                  //   ),
+                  // ],
+                  // if (isHost) ...[
+                  //   SizedBox(width: 30),
+                  //   Transform.rotate(
+                  //     angle: 3.1416,
+                  //     child: circleButton(
+                  //       30,
+                  //       30,
+                  //       "assets/images/play.svg",
+                  //       onTap: () {
+                  //         print("Tapped play");
+                  //       },
+                  //     ),
+                  //   ),
+                  // ],
+                ],
+              ),
+              if (isHost) SizedBox(height: 20),
+              if (!isHost)
+                Text(
+                  // "Host Mic Off",
+                  "",
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.black,
+                  ),
+                ),
+            ],
           ),
         );
       },

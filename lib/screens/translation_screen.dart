@@ -115,35 +115,441 @@ class _TranslationScreenState extends State<TranslationScreen> {
                     ),
                     child: Column(
                       children: [
-                        Expanded(flex: 1, child: SizedBox()),
+                        // Expanded(flex: 1, child: SizedBox()),
                         Expanded(
-                          flex: 20,
+                          // flex: 30,
                           child: Stack(
                             clipBehavior: Clip.none,
                             children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(14),
-                                child: CustomPaint(
-                                  size: Size(double.infinity, double.infinity),
-                                  painter: DiagonalPainter(),
+                              Padding(
+                                padding: EdgeInsets.only(top: 40, bottom: 45),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: CustomPaint(
+                                    size: Size(double.infinity, double.infinity),
+                                    painter: DiagonalPainter(),
+                                  ),
                                 ),
                               ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Expanded(
-                                    flex: 6,
-                                    child: Transform.rotate(
-                                      angle: 3.1416, // 180 degrees in radians
+                              Padding(
+                                padding: EdgeInsets.only(top: 30, bottom: 30),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      flex: 6,
+                                      child: Transform.rotate(
+                                        angle: 3.1416, // 180 degrees in radians
+                                        child: Container(
+                                          width: double.infinity,
+                                          constraints: const BoxConstraints(
+                                            minHeight: 140,
+                                          ),
+                                          padding: const EdgeInsets.all(14),
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(
+                                                14),
+                                          ),
+                                          child: SizedBox(
+                                            height: 150,
+                                            child: Stack(
+                                              children: [
+                                                // 🧠 Main Content
+                                                Positioned.fill(
+                                                  child: Builder(
+                                                    builder: (context) {
+                                                      // 🔄 LOADING
+                                                      // if (provider.isLoading) {
+                                                      //   return const Center(
+                                                      //     child:
+                                                      //         CircularProgressIndicator(),
+                                                      //   );
+                                                      // }
+
+                                                      // ❌ ERROR
+                                                      if (provider.hasError) {
+                                                        return Center(
+                                                          child: Text(
+                                                            provider.errorMessage,
+                                                            style: TextStyle(
+                                                              color: Colors.red,
+                                                              fontSize: 14,
+                                                            ),
+                                                            textAlign:
+                                                            TextAlign.center,
+                                                          ),
+                                                        );
+                                                      }
+
+                                                      // ✅ SUCCESS / DEFAULT
+                                                      return SingleChildScrollView(
+                                                        reverse: true,
+                                                        child: Padding(
+                                                          padding:
+                                                          EdgeInsets.only(left: 14,right: 14,top: 10, bottom: 30),
+                                                          child: Column(
+                                                            crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                            children: [
+
+                                                              /// 🟢 HISTORY
+                                                              ...provider.messages
+                                                                  .map((msg,) {
+                                                                return Padding(
+                                                                  padding:
+                                                                  const EdgeInsets
+                                                                      .symmetric(
+                                                                    vertical: 4,
+                                                                  ),
+                                                                  child: Text(
+                                                                    "${msg
+                                                                        .speakerLabel} - ${msg
+                                                                        .isHost
+                                                                        ? msg
+                                                                        .originalText
+                                                                        : msg
+                                                                        .translatedText}",
+                                                                    style: TextStyle(
+                                                                      fontSize: 14,
+                                                                      fontWeight:
+                                                                      FontWeight
+                                                                          .w400,
+                                                                      color: Colors
+                                                                          .black,
+                                                                    ),
+                                                                  ),
+                                                                );
+                                                              }),
+
+                                                              /// 🔴 LIVE TEXT
+                                                              if (provider
+                                                                  .isHostSpeaking &&
+                                                                  provider
+                                                                      .liveText
+                                                                      .isNotEmpty)
+                                                                Text(
+                                                                  "Host - ${provider
+                                                                      .liveText}",
+                                                                  style: TextStyle(
+                                                                    fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                    color: Colors.black
+                                                                  ),
+                                                                ),
+
+                                                              /// 🟢 LOADER (SHOW IN HOST BOX WHEN GUEST IS SPEAKING)
+                                                              if (!provider.isHostSpeaking && provider.isTranslating)
+                                                                Row(
+                                                                  children: [
+                                                                    Image.asset(
+                                                                      "assets/images/dot.gif",
+                                                                      height: 37,
+                                                                      width: 56,
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      );
+                                                    },
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      // flex: 2,
+                                      flex: MediaQuery.of(context).size.height < 500 ? 6 : 2,
+                                      child: LayoutBuilder(
+                                        builder: (context, constraints) {
+                                          return Stack(
+                                            children: [
+
+                                              /// 🔵 LEFT 50% SVG
+                                              Positioned(
+                                                left: 0,
+                                                top: 0,
+                                                bottom: 0,
+                                                width: constraints.maxWidth * 0.5,
+                                                child: SvgPicture.asset(
+                                                  "assets/images/green_rectangle.svg",
+                                                  fit: BoxFit.fill,
+                                                ),
+                                              ),
+
+                                              /// 🟢 RIGHT 50% SVG
+                                              Positioned(
+                                                right: 0,
+                                                top: 0,
+                                                bottom: 0,
+                                                width: constraints.maxWidth * 0.5,
+                                                child: SvgPicture.asset(
+                                                  "assets/images/white_rectangle.svg",
+                                                  fit: BoxFit.fill,
+                                                ),
+                                              ),
+                                              Row(
+                                                children: [
+                                                  SizedBox(width: 8),
+                                                  Expanded(
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                      children: [
+                                                        Expanded(
+                                                          child: Row(
+                                                            crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .end,
+                                                            children: [
+                                                              SizedBox(width: 15),
+                                                              Transform.rotate(
+                                                                angle: 3.1416,
+                                                                child: SizedBox(
+                                                                  height: 10,
+                                                                  width: 15,
+                                                                  child: Image
+                                                                      .asset(
+                                                                    "assets/images/polygon.png",
+                                                                    fit:
+                                                                    BoxFit.fill,
+                                                                    color: Color(
+                                                                      0xFFC9DED4,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                        DropdownButtonFormField<
+                                                            String
+                                                        >(
+                                                          value:
+                                                          provider.hostLanguage,
+                                                          style: TextStyle(
+                                                            color: Colors.black,
+                                                          ),
+                                                          iconSize: 0,
+                                                          dropdownColor:
+                                                          Colors.white,
+                                                          iconEnabledColor:
+                                                          Theme
+                                                              .of(context)
+                                                              .colorScheme
+                                                              .secondary,
+                                                          decoration: InputDecoration(
+                                                            filled: true,
+                                                            fillColor: Color(
+                                                              0xFFC9DED4,
+                                                            ),
+                                                            enabledBorder:
+                                                            OutlineInputBorder(
+                                                              borderSide: BorderSide(
+                                                                color: Colors
+                                                                    .transparent,
+                                                              ),
+                                                              borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                12,
+                                                              ),
+                                                            ),
+                                                            focusedBorder:
+                                                            OutlineInputBorder(
+                                                              borderSide: BorderSide(
+                                                                color: Colors
+                                                                    .transparent,
+                                                              ),
+                                                              borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                12,
+                                                              ),
+                                                            ),
+                                                            // border: OutlineInputBorder(
+                                                            //   borderRadius: BorderRadius.circular(12),
+                                                            // ),
+                                                            contentPadding:
+                                                            const EdgeInsets
+                                                                .symmetric(
+                                                              horizontal: 12,
+                                                            ),
+                                                          ),
+                                                          items: provider
+                                                              .languages
+                                                              .reversed
+                                                              .map((lang) {
+                                                            return DropdownMenuItem(
+                                                              value: lang,
+                                                              child: Transform
+                                                                  .rotate(
+                                                                angle: 3.1416,
+                                                                child: Row(
+                                                                  children: [
+                                                                    Text(lang),
+                                                                    Icon(
+                                                                      Icons
+                                                                          .arrow_drop_down,
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                            );
+                                                          })
+                                                              .toList(),
+                                                          onChanged: (val) {
+                                                            if (val != null) {
+                                                              provider
+                                                                  .setSourceLanguage(
+                                                                val,
+                                                              );
+                                                            }
+                                                          },
+                                                        ),
+                                                        Expanded(
+                                                            child: SizedBox()),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  SizedBox(width: 5),
+                                                  SizedBox(
+                                                    height: 35,
+                                                    width: 40,
+                                                    child: Image.asset(
+                                                      "assets/images/swap_button.png",
+                                                      fit: BoxFit.fill,
+                                                    ),
+                                                  ),
+                                                  SizedBox(width: 5),
+                                                  Expanded(
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                      children: [
+                                                        Expanded(
+                                                            child: SizedBox()),
+                                                        DropdownButtonFormField<
+                                                            String
+                                                        >(
+                                                          value: provider
+                                                              .guestLanguage,
+                                                          style: TextStyle(
+                                                            color: Colors.black,
+                                                          ),
+                                                          dropdownColor:
+                                                          Colors.white,
+                                                          iconEnabledColor:
+                                                          Theme
+                                                              .of(context)
+                                                              .colorScheme
+                                                              .secondary,
+                                                          decoration: InputDecoration(
+                                                            filled: true,
+                                                            fillColor: Color(
+                                                              0xFFC9DED4,
+                                                            ),
+                                                            enabledBorder:
+                                                            OutlineInputBorder(
+                                                              borderSide: BorderSide(
+                                                                color: Colors
+                                                                    .transparent,
+                                                              ),
+                                                              borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                12,
+                                                              ),
+                                                            ),
+                                                            focusedBorder:
+                                                            OutlineInputBorder(
+                                                              borderSide: BorderSide(
+                                                                color: Colors
+                                                                    .transparent,
+                                                              ),
+                                                              borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                12,
+                                                              ),
+                                                            ),
+                                                            // border: OutlineInputBorder(
+                                                            //   borderRadius: BorderRadius.circular(12),
+                                                            // ),
+                                                            contentPadding:
+                                                            const EdgeInsets
+                                                                .symmetric(
+                                                              horizontal: 12,
+                                                            ),
+                                                          ),
+                                                          items: provider
+                                                              .languages
+                                                              .map((lang) {
+                                                            return DropdownMenuItem(
+                                                              value: lang,
+                                                              child: Text(lang),
+                                                            );
+                                                          })
+                                                              .toList(),
+                                                          onChanged: (val) {
+                                                            if (val != null) {
+                                                              provider
+                                                                  .setTargetLanguage(
+                                                                val,
+                                                              );
+                                                            }
+                                                          },
+                                                        ),
+                                                        Expanded(
+                                                          child: Row(
+                                                            crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                            children: [
+                                                              SizedBox(width: 15),
+                                                              SizedBox(
+                                                                height: 10,
+                                                                width: 15,
+                                                                child: Image
+                                                                    .asset(
+                                                                  "assets/images/polygon.png",
+                                                                  fit: BoxFit
+                                                                      .fill,
+                                                                  color: Color(
+                                                                    0xFFC9DED4,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  SizedBox(width: 8),
+                                                ],
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                    Expanded(
+                                      flex: 6,
                                       child: Container(
                                         width: double.infinity,
                                         constraints: const BoxConstraints(
                                           minHeight: 140,
                                         ),
-                                        padding: const EdgeInsets.all(14),
+                                        padding: const EdgeInsets.only(left: 14,right: 14,top: 10, bottom: 30),
                                         decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(
-                                              14),
+                                          borderRadius: BorderRadius.circular(14),
                                         ),
                                         child: SizedBox(
                                           height: 150,
@@ -181,7 +587,9 @@ class _TranslationScreenState extends State<TranslationScreen> {
                                                       reverse: true,
                                                       child: Padding(
                                                         padding:
-                                                        EdgeInsets.only(left: 14,right: 14,top: 10, bottom: 30),
+                                                        const EdgeInsets.only(
+                                                          bottom: 10.0,
+                                                        ),
                                                         child: Column(
                                                           crossAxisAlignment:
                                                           CrossAxisAlignment
@@ -202,9 +610,9 @@ class _TranslationScreenState extends State<TranslationScreen> {
                                                                       .speakerLabel} - ${msg
                                                                       .isHost
                                                                       ? msg
-                                                                      .originalText
+                                                                      .translatedText
                                                                       : msg
-                                                                      .translatedText}",
+                                                                      .originalText}",
                                                                   style: TextStyle(
                                                                     fontSize: 14,
                                                                     fontWeight:
@@ -218,32 +626,29 @@ class _TranslationScreenState extends State<TranslationScreen> {
                                                             }),
 
                                                             /// 🔴 LIVE TEXT
-                                                            if (provider
+                                                            if (!provider
                                                                 .isHostSpeaking &&
                                                                 provider
                                                                     .liveText
                                                                     .isNotEmpty)
                                                               Text(
-                                                                "Host - ${provider
+                                                                "Guest - ${provider
                                                                     .liveText}",
                                                                 style: TextStyle(
                                                                   fontWeight:
                                                                   FontWeight
                                                                       .bold,
-                                                                  color: Colors.black
+                                                                  color:
+                                                                  Colors.black,
                                                                 ),
                                                               ),
 
-                                                            /// 🟢 LOADER (SHOW IN HOST BOX WHEN GUEST IS SPEAKING)
-                                                            if (!provider.isHostSpeaking && provider.isTranslating)
-                                                              Row(
-                                                                children: [
-                                                                  Image.asset(
-                                                                    "assets/images/dot.gif",
-                                                                    height: 37,
-                                                                    width: 56,
-                                                                  ),
-                                                                ],
+                                                            /// 🟢 LOADER (SHOW IN GUEST BOX WHEN HOST IS SPEAKING)
+                                                            if (provider.isHostSpeaking && provider.isTranslating)
+                                                              Image.asset(
+                                                                "assets/images/dot.gif",
+                                                                height: 37,
+                                                                width: 56,
                                                               ),
                                                           ],
                                                         ),
@@ -257,414 +662,15 @@ class _TranslationScreenState extends State<TranslationScreen> {
                                         ),
                                       ),
                                     ),
-                                  ),
-                                  Expanded(
-                                    // flex: 2,
-                                    flex: MediaQuery.of(context).size.height < 500 ? 5 : 2,
-                                    child: LayoutBuilder(
-                                      builder: (context, constraints) {
-                                        return Stack(
-                                          children: [
-
-                                            /// 🔵 LEFT 50% SVG
-                                            Positioned(
-                                              left: 0,
-                                              top: 0,
-                                              bottom: 0,
-                                              width: constraints.maxWidth * 0.5,
-                                              child: SvgPicture.asset(
-                                                "assets/images/green_rectangle.svg",
-                                                fit: BoxFit.fill,
-                                              ),
-                                            ),
-
-                                            /// 🟢 RIGHT 50% SVG
-                                            Positioned(
-                                              right: 0,
-                                              top: 0,
-                                              bottom: 0,
-                                              width: constraints.maxWidth * 0.5,
-                                              child: SvgPicture.asset(
-                                                "assets/images/white_rectangle.svg",
-                                                fit: BoxFit.fill,
-                                              ),
-                                            ),
-                                            Row(
-                                              children: [
-                                                SizedBox(width: 8),
-                                                Expanded(
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                    children: [
-                                                      Expanded(
-                                                        child: Row(
-                                                          crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .end,
-                                                          children: [
-                                                            SizedBox(width: 15),
-                                                            Transform.rotate(
-                                                              angle: 3.1416,
-                                                              child: SizedBox(
-                                                                height: 10,
-                                                                width: 15,
-                                                                child: Image
-                                                                    .asset(
-                                                                  "assets/images/polygon.png",
-                                                                  fit:
-                                                                  BoxFit.fill,
-                                                                  color: Color(
-                                                                    0xFFC9DED4,
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                      DropdownButtonFormField<
-                                                          String
-                                                      >(
-                                                        value:
-                                                        provider.hostLanguage,
-                                                        style: TextStyle(
-                                                          color: Colors.black,
-                                                        ),
-                                                        iconSize: 0,
-                                                        dropdownColor:
-                                                        Colors.white,
-                                                        iconEnabledColor:
-                                                        Theme
-                                                            .of(context)
-                                                            .colorScheme
-                                                            .secondary,
-                                                        decoration: InputDecoration(
-                                                          filled: true,
-                                                          fillColor: Color(
-                                                            0xFFC9DED4,
-                                                          ),
-                                                          enabledBorder:
-                                                          OutlineInputBorder(
-                                                            borderSide: BorderSide(
-                                                              color: Colors
-                                                                  .transparent,
-                                                            ),
-                                                            borderRadius:
-                                                            BorderRadius
-                                                                .circular(
-                                                              12,
-                                                            ),
-                                                          ),
-                                                          focusedBorder:
-                                                          OutlineInputBorder(
-                                                            borderSide: BorderSide(
-                                                              color: Colors
-                                                                  .transparent,
-                                                            ),
-                                                            borderRadius:
-                                                            BorderRadius
-                                                                .circular(
-                                                              12,
-                                                            ),
-                                                          ),
-                                                          // border: OutlineInputBorder(
-                                                          //   borderRadius: BorderRadius.circular(12),
-                                                          // ),
-                                                          contentPadding:
-                                                          const EdgeInsets
-                                                              .symmetric(
-                                                            horizontal: 12,
-                                                          ),
-                                                        ),
-                                                        items: provider
-                                                            .languages
-                                                            .reversed
-                                                            .map((lang) {
-                                                          return DropdownMenuItem(
-                                                            value: lang,
-                                                            child: Transform
-                                                                .rotate(
-                                                              angle: 3.1416,
-                                                              child: Row(
-                                                                children: [
-                                                                  Text(lang),
-                                                                  Icon(
-                                                                    Icons
-                                                                        .arrow_drop_down,
-                                                                  ),
-                                                                ],
-                                                              ),
-                                                            ),
-                                                          );
-                                                        })
-                                                            .toList(),
-                                                        onChanged: (val) {
-                                                          if (val != null) {
-                                                            provider
-                                                                .setSourceLanguage(
-                                                              val,
-                                                            );
-                                                          }
-                                                        },
-                                                      ),
-                                                      Expanded(
-                                                          child: SizedBox()),
-                                                    ],
-                                                  ),
-                                                ),
-                                                SizedBox(width: 5),
-                                                SizedBox(
-                                                  height: 35,
-                                                  width: 40,
-                                                  child: Image.asset(
-                                                    "assets/images/swap_button.png",
-                                                    fit: BoxFit.fill,
-                                                  ),
-                                                ),
-                                                SizedBox(width: 5),
-                                                Expanded(
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                    children: [
-                                                      Expanded(
-                                                          child: SizedBox()),
-                                                      DropdownButtonFormField<
-                                                          String
-                                                      >(
-                                                        value: provider
-                                                            .guestLanguage,
-                                                        style: TextStyle(
-                                                          color: Colors.black,
-                                                        ),
-                                                        dropdownColor:
-                                                        Colors.white,
-                                                        iconEnabledColor:
-                                                        Theme
-                                                            .of(context)
-                                                            .colorScheme
-                                                            .secondary,
-                                                        decoration: InputDecoration(
-                                                          filled: true,
-                                                          fillColor: Color(
-                                                            0xFFC9DED4,
-                                                          ),
-                                                          enabledBorder:
-                                                          OutlineInputBorder(
-                                                            borderSide: BorderSide(
-                                                              color: Colors
-                                                                  .transparent,
-                                                            ),
-                                                            borderRadius:
-                                                            BorderRadius
-                                                                .circular(
-                                                              12,
-                                                            ),
-                                                          ),
-                                                          focusedBorder:
-                                                          OutlineInputBorder(
-                                                            borderSide: BorderSide(
-                                                              color: Colors
-                                                                  .transparent,
-                                                            ),
-                                                            borderRadius:
-                                                            BorderRadius
-                                                                .circular(
-                                                              12,
-                                                            ),
-                                                          ),
-                                                          // border: OutlineInputBorder(
-                                                          //   borderRadius: BorderRadius.circular(12),
-                                                          // ),
-                                                          contentPadding:
-                                                          const EdgeInsets
-                                                              .symmetric(
-                                                            horizontal: 12,
-                                                          ),
-                                                        ),
-                                                        items: provider
-                                                            .languages
-                                                            .map((lang) {
-                                                          return DropdownMenuItem(
-                                                            value: lang,
-                                                            child: Text(lang),
-                                                          );
-                                                        })
-                                                            .toList(),
-                                                        onChanged: (val) {
-                                                          if (val != null) {
-                                                            provider
-                                                                .setTargetLanguage(
-                                                              val,
-                                                            );
-                                                          }
-                                                        },
-                                                      ),
-                                                      Expanded(
-                                                        child: Row(
-                                                          crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                          children: [
-                                                            SizedBox(width: 15),
-                                                            SizedBox(
-                                                              height: 10,
-                                                              width: 15,
-                                                              child: Image
-                                                                  .asset(
-                                                                "assets/images/polygon.png",
-                                                                fit: BoxFit
-                                                                    .fill,
-                                                                color: Color(
-                                                                  0xFFC9DED4,
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                                SizedBox(width: 8),
-                                              ],
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                  Expanded(
-                                    flex: 6,
-                                    child: Container(
-                                      width: double.infinity,
-                                      constraints: const BoxConstraints(
-                                        minHeight: 140,
-                                      ),
-                                      padding: const EdgeInsets.only(left: 14,right: 14,top: 10, bottom: 30),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(14),
-                                      ),
-                                      child: SizedBox(
-                                        height: 150,
-                                        child: Stack(
-                                          children: [
-                                            // 🧠 Main Content
-                                            Positioned.fill(
-                                              child: Builder(
-                                                builder: (context) {
-                                                  // 🔄 LOADING
-                                                  // if (provider.isLoading) {
-                                                  //   return const Center(
-                                                  //     child:
-                                                  //         CircularProgressIndicator(),
-                                                  //   );
-                                                  // }
-
-                                                  // ❌ ERROR
-                                                  if (provider.hasError) {
-                                                    return Center(
-                                                      child: Text(
-                                                        provider.errorMessage,
-                                                        style: TextStyle(
-                                                          color: Colors.red,
-                                                          fontSize: 14,
-                                                        ),
-                                                        textAlign:
-                                                        TextAlign.center,
-                                                      ),
-                                                    );
-                                                  }
-
-                                                  // ✅ SUCCESS / DEFAULT
-                                                  return SingleChildScrollView(
-                                                    reverse: true,
-                                                    child: Padding(
-                                                      padding:
-                                                      const EdgeInsets.only(
-                                                        bottom: 10.0,
-                                                      ),
-                                                      child: Column(
-                                                        crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                        children: [
-
-                                                          /// 🟢 HISTORY
-                                                          ...provider.messages
-                                                              .map((msg,) {
-                                                            return Padding(
-                                                              padding:
-                                                              const EdgeInsets
-                                                                  .symmetric(
-                                                                vertical: 4,
-                                                              ),
-                                                              child: Text(
-                                                                "${msg
-                                                                    .speakerLabel} - ${msg
-                                                                    .isHost
-                                                                    ? msg
-                                                                    .translatedText
-                                                                    : msg
-                                                                    .originalText}",
-                                                                style: TextStyle(
-                                                                  fontSize: 14,
-                                                                  fontWeight:
-                                                                  FontWeight
-                                                                      .w400,
-                                                                  color: Colors
-                                                                      .black,
-                                                                ),
-                                                              ),
-                                                            );
-                                                          }),
-
-                                                          /// 🔴 LIVE TEXT
-                                                          if (!provider
-                                                              .isHostSpeaking &&
-                                                              provider
-                                                                  .liveText
-                                                                  .isNotEmpty)
-                                                            Text(
-                                                              "Guest - ${provider
-                                                                  .liveText}",
-                                                              style: TextStyle(
-                                                                fontWeight:
-                                                                FontWeight
-                                                                    .bold,
-                                                                color:
-                                                                Colors.black,
-                                                              ),
-                                                            ),
-
-                                                          /// 🟢 LOADER (SHOW IN GUEST BOX WHEN HOST IS SPEAKING)
-                                                          if (provider.isHostSpeaking && provider.isTranslating)
-                                                            Image.asset(
-                                                              "assets/images/dot.gif",
-                                                              height: 37,
-                                                              width: 56,
-                                                            ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  );
-                                                },
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                               Positioned(
-                                top: -40,
+                                top: 0,
                                 left: 0,
                                 right: 0,
                                 child: SizedBox(
-                                  height: 110,
+                                  height: 90,
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
@@ -677,11 +683,11 @@ class _TranslationScreenState extends State<TranslationScreen> {
                                 ),
                               ),
                               Positioned(
-                                bottom: -45,
+                                bottom: 0,
                                 left: 0,
                                 right: 0,
                                 child: SizedBox(
-                                  height: 110,
+                                  height: 90,
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
@@ -693,30 +699,48 @@ class _TranslationScreenState extends State<TranslationScreen> {
                                   ),
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                          flex: 2,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              GestureDetector(
-                                onTap: (){
-                                  showSettingsDialog(context);
-                                },
-                                child: SizedBox(
-                                  height: 35,
-                                  width: 44,
-                                  child: Image.asset(
-                                    "assets/images/settings.png",
-                                    fit: BoxFit.fill,
+                              Positioned(
+                                bottom: 0,
+                                // left: 0,
+                                right: 0,
+                                child: GestureDetector(
+                                  onTap: (){
+                                    showSettingsDialog(context);
+                                  },
+                                  child: SizedBox(
+                                    height: 35,
+                                    width: 44,
+                                    child: Image.asset(
+                                      "assets/images/settings.png",
+                                      fit: BoxFit.fill,
+                                    ),
                                   ),
                                 ),
                               ),
                             ],
                           ),
                         ),
+                        // Expanded(
+                        //   flex: 2,
+                        //   child: Row(
+                        //     mainAxisAlignment: MainAxisAlignment.end,
+                        //     children: [
+                        //       GestureDetector(
+                        //         onTap: (){
+                        //           showSettingsDialog(context);
+                        //         },
+                        //         child: SizedBox(
+                        //           height: 35,
+                        //           width: 44,
+                        //           child: Image.asset(
+                        //             "assets/images/settings.png",
+                        //             fit: BoxFit.fill,
+                        //           ),
+                        //         ),
+                        //       ),
+                        //     ],
+                        //   ),
+                        // ),
                       ],
                     ),
                   ),
@@ -812,15 +836,18 @@ class _TranslationScreenState extends State<TranslationScreen> {
                           children: [
                             Expanded(flex: 1, child: SizedBox()),
                             Expanded(
-                              flex: 14,
+                              flex: 30,
                               child: Stack(
                                 clipBehavior: Clip.none,
                                 children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(14),
-                                    child: CustomPaint(
-                                      size: Size(double.infinity, double.infinity),
-                                      painter: DiagonalPainter(),
+                                  Padding(
+                                    padding: EdgeInsets.only(top: 40, bottom: 60),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(14),
+                                      child: CustomPaint(
+                                        size: Size(double.infinity, double.infinity),
+                                        painter: DiagonalPainter(),
+                                      ),
                                     ),
                                   ),
                                   Column(
@@ -1360,7 +1387,7 @@ class _TranslationScreenState extends State<TranslationScreen> {
                                     ],
                                   ),
                                   Positioned(
-                                    top: -45,
+                                    top: 0,
                                     left: 0,
                                     right: 0,
                                     child: SizedBox(
@@ -1377,7 +1404,7 @@ class _TranslationScreenState extends State<TranslationScreen> {
                                     ),
                                   ),
                                   Positioned(
-                                    bottom: -45,
+                                    bottom: 0,
                                     left: 0,
                                     right: 0,
                                     child: SizedBox(
@@ -1393,30 +1420,49 @@ class _TranslationScreenState extends State<TranslationScreen> {
                                       ),
                                     ),
                                   ),
-                                ],
-                              ),
-                            ),
-                            Expanded(
-                              flex: 2,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  GestureDetector(
-                                    onTap: (){
-                                      showSettingsDialog(context);
-                                    },
-                                    child: SizedBox(
-                                      height: 35,
-                                      width: 44,
-                                      child: Image.asset(
-                                        "assets/images/settings.png",
-                                        fit: BoxFit.fill,
+                                  Positioned(
+                                    bottom: 0,
+                                    // left: 0,
+                                    right: 0,
+                                    child: GestureDetector(
+                                      onTap: (){
+                                        showSettingsDialog(context);
+                                      },
+                                      child: SizedBox(
+                                        height: 35,
+                                        width: 44,
+                                        child: Image.asset(
+                                          "assets/images/settings.png",
+                                          fit: BoxFit.fill,
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ],
                               ),
                             ),
+                            Expanded(flex: 1, child: SizedBox()),
+                            // Expanded(
+                            //   flex: 2,
+                            //   child: Row(
+                            //     mainAxisAlignment: MainAxisAlignment.end,
+                            //     children: [
+                            //       GestureDetector(
+                            //         onTap: (){
+                            //           showSettingsDialog(context);
+                            //         },
+                            //         child: SizedBox(
+                            //           height: 35,
+                            //           width: 44,
+                            //           child: Image.asset(
+                            //             "assets/images/settings.png",
+                            //             fit: BoxFit.fill,
+                            //           ),
+                            //         ),
+                            //       ),
+                            //     ],
+                            //   ),
+                            // ),
                           ],
                         ),
                       ),
