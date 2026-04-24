@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:translation/providers/translation_provider.dart';
@@ -24,13 +26,17 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
   late stt.SpeechToText _speech;
 
   // bool _isListening = false;
-  bool get _isListening => widget.translationProvider.activeMic ==  (widget.isHost ? ActiveMic.host : ActiveMic.guest);
+  bool get _isListening =>
+      widget.translationProvider.activeMic ==
+      (widget.isHost ? ActiveMic.host : ActiveMic.guest);
 
   String _lastWords = "";
   bool _speechEnabled = false;
   late AnimationController _micAnimationController;
   late Animation<double> _micAnimation;
   bool _hasInternet = true;
+  Timer? _internetCheckTimer;
+
   @override
   void initState() {
     super.initState();
@@ -132,7 +138,6 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
   }
 
   void _startListening() async {
-
     widget.translationProvider.setSpeechLanguage(widget.isHost);
 
     // 🔥 STOP TTS (fix crash)
@@ -203,10 +208,31 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
                 .translationProvider
                 .guestLanguage],
     );
+
+    /// 🔥🔥 ADD TIMER HERE (IMPORTANT)
+    _internetCheckTimer?.cancel(); // avoid duplicates
+
+    _internetCheckTimer = Timer.periodic(const Duration(seconds: 2), (
+      timer,
+    ) async {
+      if (!_isListening) {
+        timer.cancel();
+        return;
+      }
+
+      final internet = await hasInternet();
+
+      if (!internet) {
+        showError(context, "⚠️ Internet lost");
+        _forceStopMic();
+        timer.cancel();
+      }
+    });
   }
 
   void _stopListening() {
     // setState(() => _isListening = false);
+    _internetCheckTimer?.cancel();
     _micAnimationController.stop();
     _micAnimationController.reset();
     _speech.stop();
@@ -246,10 +272,27 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
 
   @override
   void dispose() {
+    _internetCheckTimer?.cancel();
     _speech.stop();
     _micAnimationController.dispose();
     messageController.dispose();
     super.dispose();
+  }
+
+  void _forceStopMic() async {
+    final provider = widget.translationProvider;
+
+    await _speech.stop();
+
+    _internetCheckTimer?.cancel(); // 🔥 MUST
+
+    provider.stopMic();
+    provider.updateLiveText("", isHost: widget.isHost);
+
+    _micAnimationController.stop();
+    _micAnimationController.reset();
+
+    setState(() {});
   }
 
   Widget _buildSendButton() {
@@ -291,31 +334,6 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
               if (!isHost) SizedBox(height: 20),
               Row(
                 children: [
-                  // if (isHost) ...[
-                  //   Transform.rotate(
-                  //     angle: 3.1416,
-                  //     child: circleButton(
-                  //       30,
-                  //       30,
-                  //       "assets/images/pause.svg",
-                  //       onTap: () {
-                  //         print("Tapped pause");
-                  //       },
-                  //     ),
-                  //   ),
-                  //   SizedBox(width: 30),
-                  // ],
-                  // if (!isHost) ...[
-                  //   circleButton(
-                  //     30,
-                  //     30,
-                  //     "assets/images/play.svg",
-                  //     onTap: () {
-                  //       print("Tapped play");
-                  //     },
-                  //   ),
-                  //   SizedBox(width: 30),
-                  // ],
                   Transform.rotate(
                     angle: isHost ? 3.1416 : 0,
                     child: circleButton(
@@ -324,82 +342,64 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
                       _isListening
                           ? "assets/images/mic_on.gif"
                           : "assets/images/mic_off.svg",
-                      onTap: !_hasInternet
-                          ? () => showError(context, "No internet")
-                          : () async {
+                      onTap: () async {
+                        final internet = await hasInternet();
+
+                        if (!internet) {
+                          showError(context, "No internet available");
+                          return;
+                        }
+
                         final provider = widget.translationProvider;
 
-                        final requestedMic =
-                        widget.isHost ? ActiveMic.host : ActiveMic.guest;
+                        final requestedMic = widget.isHost
+                            ? ActiveMic.host
+                            : ActiveMic.guest;
 
                         final isSameMic = provider.activeMic == requestedMic;
 
-                        // 🔥 STOP EVERYTHING FIRST
-                        await provider.stop(); // stop TTS
+                        await provider.stop();
                         await _speech.stop();
 
                         await Future.delayed(const Duration(milliseconds: 300));
 
                         if (isSameMic) {
-                          // 👉 STOP
-                          // provider.activeMic = ActiveMic.none;
-                          // provider.notifyListeners();
-
                           provider.stopMic();
-
                           _stopListening();
                           await _sendMessage();
                         } else {
                           _resetForNewMic();
-                          // 👉 SWITCH MIC
-
                           provider.setActiveMic(requestedMic);
-                          // provider.activeMic = requestedMic;
-                          // provider.notifyListeners();
-
                           _startListening();
                         }
                       },
                       // onTap: !_hasInternet
-                      //     ? () => showError(context, "No internet")
+                      //     ? () => showError(context, "No internet available")
                       //     : () async {
-                      //         if (_isListening) {
-                      //           _stopListening();
-                      //           await _sendMessage();
-                      //         } else {
-                      //           _startListening();
-                      //         }
+                      //   final provider = widget.translationProvider;
                       //
-                      //         /// 🔥 FORCE UI UPDATE
-                      //         setState(() {});
-                      //       },
+                      //   final requestedMic =
+                      //   widget.isHost ? ActiveMic.host : ActiveMic.guest;
+                      //
+                      //   final isSameMic = provider.activeMic == requestedMic;
+                      //
+                      //   await provider.stop();
+                      //   await _speech.stop();
+                      //
+                      //   await Future.delayed(const Duration(milliseconds: 300));
+                      //
+                      //   if (isSameMic) {
+                      //     provider.stopMic();
+                      //     _stopListening();
+                      //     await _sendMessage();
+                      //   } else {
+                      //     _resetForNewMic();
+                      //     provider.setActiveMic(requestedMic);
+                      //     _startListening();
+                      //   }
+                      // },
                     ),
                   ),
-                  // if (!isHost) ...[
-                  //   SizedBox(width: 30),
-                  //   circleButton(
-                  //     30,
-                  //     30,
-                  //     "assets/images/pause.svg",
-                  //     onTap: () {
-                  //       print("Tapped pause");
-                  //     },
-                  //   ),
-                  // ],
-                  // if (isHost) ...[
-                  //   SizedBox(width: 30),
-                  //   Transform.rotate(
-                  //     angle: 3.1416,
-                  //     child: circleButton(
-                  //       30,
-                  //       30,
-                  //       "assets/images/play.svg",
-                  //       onTap: () {
-                  //         print("Tapped play");
-                  //       },
-                  //     ),
-                  //   ),
-                  // ],
                 ],
               ),
               if (isHost) SizedBox(height: 20),
@@ -419,6 +419,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
       },
     );
   }
+
   void _resetForNewMic() {
     _lastWords = "";
 

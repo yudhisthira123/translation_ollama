@@ -276,7 +276,6 @@ class TranslationProvider extends ChangeNotifier {
             // Speaking the translated text
             speak(_translatedText);
 
-
             /// 🔥 NOW CLEAR LIVE TEXT
             liveText = "";
 
@@ -329,7 +328,6 @@ class TranslationProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-
   Future<void> speak(String text) async {
     if (text.isEmpty) return;
 
@@ -341,11 +339,11 @@ class TranslationProvider extends ChangeNotifier {
     double speechRate;
 
     if (kIsWeb) {
-      speechRate = 0.3 + (rate * 0.6);
+      speechRate = 0.3 + (rate * 0.4);
     } else if (defaultTargetPlatform == TargetPlatform.iOS) {
       speechRate = 0.2 + (rate * 0.3);
     } else {
-      speechRate = 0.3 + (rate * 0.6);
+      speechRate = 0.3 + (rate * 0.4);
     }
 
     await flutterTts.setSpeechRate(speechRate);
