@@ -1,10 +1,12 @@
 
-import 'dart:ui';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:provider/provider.dart';
+
+import 'apptheme/apptheme.dart';
+import 'apptheme/theme_provider.dart';
 
 class AppColor {
   static const Color darkBgColor = Color(0xFF0F172A);
@@ -216,41 +218,6 @@ void showError(BuildContext context,String message) {
   );
 }
 
-// Widget circleButton(
-//     double height,
-//     double width,
-//     String icon, {
-//       required VoidCallback onTap,
-//     }) {
-//   final bool isMicOn = icon == "assets/images/mic_on.gif";
-//
-//   return GestureDetector(
-//     onTap: onTap,
-//     child: SizedBox(
-//       height: height,
-//       width: width,
-//       child: Center(
-//         child: isMicOn ?
-//         Image.asset(
-//           "assets/images/mic_on.gif",
-//           fit: BoxFit.fill,
-//         )
-//         //     ? Transform.rotate(
-//         //   angle: 3.1416,
-//         //   child: SvgPicture.asset(
-//         //     icon,
-//         //     fit: BoxFit.fill,
-//         //   ),
-//         // )
-//             : SvgPicture.asset(
-//           icon,
-//           fit: BoxFit.fill,
-//         ),
-//       ),
-//     ),
-//   );
-// }
-
 Widget circleButton(
     double height,
     double width,
@@ -295,4 +262,146 @@ Widget circleButton(
       ),
     ),
   );
+}
+
+
+class RectangularThumbShape extends SliderComponentShape {
+  final double width;
+  final double height;
+
+  const RectangularThumbShape({this.width = 12, this.height = 26});
+
+  @override
+  Size getPreferredSize(bool isEnabled, bool isDiscrete) {
+    return Size(width, height);
+  }
+
+  @override
+  void paint(
+      PaintingContext context,
+      Offset center, {
+        required Animation<double> activationAnimation,
+        required Animation<double> enableAnimation,
+        required bool isDiscrete,
+        required TextPainter labelPainter,
+        required RenderBox parentBox,
+        required SliderThemeData sliderTheme,
+        required TextDirection textDirection,
+        required double value,
+        required double textScaleFactor,
+        required Size sizeWithOverflow,
+      }) {
+    final Canvas canvas = context.canvas;
+
+    final rect = Rect.fromCenter(center: center, width: width, height: height);
+
+    final paint = Paint()
+      ..color = sliderTheme.thumbColor ?? Colors.black
+      ..style = PaintingStyle.fill;
+
+    canvas.drawRRect(RRect.fromRectAndRadius(rect, Radius.circular(4)), paint);
+  }
+}
+
+class ActiveThemeButton extends StatelessWidget {
+  const ActiveThemeButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+    final currentTheme = themeProvider.currentTheme;
+
+    return GestureDetector(
+      onTap: () {
+        if (currentTheme == AppTheme.dark) {
+          themeProvider.setTheme(AppTheme.light);
+        } else {
+          themeProvider.setTheme(AppTheme.dark);
+        }
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        width: 44,
+        height: 44,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: _borderForTheme(currentTheme).withOpacity(0.15),
+          border: Border.all(color: _borderForTheme(currentTheme), width: 1.5),
+        ),
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 200),
+          transitionBuilder: (child, animation) {
+            return RotationTransition(
+              turns: animation,
+              child: FadeTransition(opacity: animation, child: child),
+            );
+          },
+          child: Icon(
+            _iconForTheme(currentTheme),
+            key: ValueKey(currentTheme),
+            size: 22,
+            color: _iconColorForTheme(currentTheme),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+IconData _iconForTheme(AppTheme theme) {
+  switch (theme) {
+    case AppTheme.dark:
+      return Icons.wb_sunny;
+    case AppTheme.light:
+      return Icons.brightness_3;
+  }
+}
+
+Color _borderForTheme(AppTheme theme) {
+  switch (theme) {
+    case AppTheme.dark:
+      return const Color(0xFF2C2C2C);
+    case AppTheme.light:
+      return const Color(0xFFA3A7AB);
+  }
+}
+
+Color _iconColorForTheme(AppTheme theme) {
+  return const Color(0xFFFFC83D);
+}
+
+class DiagonalPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final greenPaint = Paint()
+      ..color = Color(0xFF8AD8B7)
+      ..style = PaintingStyle.fill;
+
+    final whitePaint = Paint()
+      ..color = Color(0xFFF3F3F3)
+      ..style = PaintingStyle.fill;
+
+    // 🔷 GREEN PART (Top side)
+    Path greenPath = Path();
+    greenPath.moveTo(0, 0);
+    greenPath.lineTo(size.width, 0);
+    greenPath.lineTo(size.width, size.height * 0.5);
+    greenPath.lineTo(0, size.height * 0.5);
+    greenPath.close();
+
+    canvas.drawPath(greenPath, greenPaint);
+
+    // ⚪ WHITE PART (Bottom side)
+    Path whitePath = Path();
+    whitePath.moveTo(0, size.height * 0.5);
+    whitePath.lineTo(size.width, size.height * 0.5);
+    whitePath.lineTo(size.width, size.height);
+    whitePath.lineTo(0, size.height);
+    whitePath.close();
+
+    canvas.drawPath(whitePath, whitePaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

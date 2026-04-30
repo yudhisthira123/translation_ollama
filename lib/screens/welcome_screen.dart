@@ -1,84 +1,3 @@
-// import 'package:flutter/material.dart';
-// import 'package:flutter_tts/flutter_tts.dart';
-// import 'package:translation/screens/translation_screen.dart';
-//
-// import '../constants.dart';
-//
-// class WelcomeScreen extends StatefulWidget {
-//   const WelcomeScreen({super.key});
-//
-//   @override
-//   State<WelcomeScreen> createState() => _WelcomeScreenState();
-// }
-//
-// class _WelcomeScreenState extends State<WelcomeScreen> {
-//   final FlutterTts tts = FlutterTts();
-//
-//   final Map<String, String> ttsLang = {
-//     'en': 'en-US',
-//     'hi': 'hi-IN',
-//     'de': 'de-DE',
-//     'es': 'es-ES',
-//     'fr': 'fr-FR',
-//     'nl': 'nl-NL',
-//     'ru': 'ru-RU',
-//     'pt': 'pt-PT',
-//     'ja': 'ja-JP',
-//   };
-//
-//   Future speak() async {
-//     String lang = Localizations.localeOf(context).languageCode;
-//
-//     await tts.setLanguage(ttsLang[lang] ?? 'en-US');
-//     await tts.speak(AppStrings.get(context, 'welcome'));
-//
-//     tts.setCompletionHandler(() {
-//       goNext();
-//     });
-//   }
-//
-//   void goNext() {
-//     Navigator.pushReplacement(
-//       context,
-//       MaterialPageRoute(builder: (_) => TranslationScreen()),
-//     );
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     final text = AppStrings.get(context, 'welcome');
-//
-//     return Scaffold(
-//       appBar: AppBar(
-//         actions: [
-//           TextButton(
-//             onPressed: goNext,
-//             child: Text(
-//               AppStrings.get(context, 'skip'),
-//               style: const TextStyle(color: Colors.white),
-//             ),
-//           ),
-//         ],
-//       ),
-//       body: Center(
-//         child: Padding(
-//           padding: const EdgeInsets.all(20),
-//           child: Column(
-//             mainAxisAlignment: MainAxisAlignment.center,
-//             children: [
-//               Text(text, textAlign: TextAlign.center),
-//               const SizedBox(height: 20),
-//               IconButton(
-//                 icon: const Icon(Icons.volume_up, size: 40),
-//                 onPressed: speak,
-//               ),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -110,52 +29,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   };
 
   bool _isSpeaking = false;
-
-
-  Future speak() async {
-    String lang = Localizations.localeOf(context).languageCode;
-
-    _isSpeaking = true;
-
-    await tts.setLanguage(ttsLang[lang] ?? 'en-US');
-    await tts.speak(AppStrings.get(context, 'welcome'));
-
-    tts.setCompletionHandler(() {
-      _isSpeaking = false;
-      goNext();
-    });
-  }
-  void onSkip() async {
-    if (_isSpeaking) {
-      await tts.stop(); // 🔥 this stops speech immediately
-      _isSpeaking = false;
-    }
-    goNext();
-  }
-  void goNext() {
-    Navigator.pushReplacement(
-      context,
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            TranslationScreen(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          const begin = Offset(1.0, 0.0); // right → left
-          const end = Offset.zero;
-          const curve = Curves.easeInOut;
-
-          var tween = Tween(begin: begin, end: end).chain(
-            CurveTween(curve: curve),
-          );
-
-          return SlideTransition(
-            position: animation.drive(tween),
-            child: child,
-          );
-        },
-        transitionDuration: Duration(milliseconds: 500),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -203,7 +76,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               child: SizedBox(
                 height: 160,
                 child: SvgPicture.asset(
-                  "assets/images/wave_light.svg", // your first SVG
+                  "assets/images/wave_light.svg",
                   fit: BoxFit.fill,
                 ),
               ),
@@ -217,7 +90,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               child: SizedBox(
                 height: 220,
                 child: SvgPicture.asset(
-                  "assets/images/wave_dark.svg", // your second SVG
+                  "assets/images/wave_dark.svg",
                   fit: BoxFit.fill,
                 ),
               ),
@@ -285,8 +158,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                             ),
                             child: ElevatedButton.icon(
                               onPressed: speak,
-                              icon: const Icon(Icons.volume_up, color: Colors
-                                  .white),
+                              icon: const Icon(
+                                Icons.volume_up,
+                                color: Colors.white,
+                              ),
                               label: Text(
                                 AppStrings.get(context, 'translate'),
                                 style: const TextStyle(
@@ -400,7 +275,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               child: SizedBox(
                 height: 460,
                 child: SvgPicture.asset(
-                  "assets/images/wave_light.svg", // your first SVG
+                  "assets/images/wave_light.svg",
                   fit: BoxFit.fill,
                 ),
               ),
@@ -414,7 +289,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               child: SizedBox(
                 height: 640,
                 child: SvgPicture.asset(
-                  "assets/images/wave_dark.svg", // your second SVG
+                  "assets/images/wave_dark.svg",
                   fit: BoxFit.fill,
                 ),
               ),
@@ -482,8 +357,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                             ),
                             child: ElevatedButton.icon(
                               onPressed: speak,
-                              icon: const Icon(Icons.volume_up, color: Colors
-                                  .white),
+                              icon: const Icon(
+                                Icons.volume_up,
+                                color: Colors.white,
+                              ),
                               label: Text(
                                 AppStrings.get(context, 'translate'),
                                 style: const TextStyle(
@@ -555,5 +432,53 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         ),
       );
     }
+  }
+
+  Future speak() async {
+    String lang = Localizations.localeOf(context).languageCode;
+
+    _isSpeaking = true;
+
+    await tts.setLanguage(ttsLang[lang] ?? 'en-US');
+    await tts.speak(AppStrings.get(context, 'welcome'));
+
+    tts.setCompletionHandler(() {
+      _isSpeaking = false;
+      goNext();
+    });
+  }
+
+  void onSkip() async {
+    if (_isSpeaking) {
+      await tts.stop(); // 🔥 this stops speech immediately
+      _isSpeaking = false;
+    }
+    goNext();
+  }
+
+  void goNext() {
+    Navigator.pushReplacement(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            TranslationScreen(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const begin = Offset(1.0, 0.0); // right → left
+          const end = Offset.zero;
+          const curve = Curves.easeInOut;
+
+          var tween = Tween(
+            begin: begin,
+            end: end,
+          ).chain(CurveTween(curve: curve));
+
+          return SlideTransition(
+            position: animation.drive(tween),
+            child: child,
+          );
+        },
+        transitionDuration: Duration(milliseconds: 500),
+      ),
+    );
   }
 }
