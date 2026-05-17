@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:translation/screens/login_screen.dart';
+import 'package:translation/screens/welcome_screen.dart';
 import 'apptheme/theme_provider.dart';
 import 'constants.dart';
 import 'providers/translation_provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
-  // runApp(const MyApp());
   runApp(
       ChangeNotifierProvider(
         create: (_) => ThemeProvider(),
@@ -35,8 +35,7 @@ class MyApp extends StatelessWidget {
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
-        // home: const TranslationScreen(),
-        home: LoginScreen(),
+        home: WelcomeScreen(),
       ),
     );
   }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:translation/providers/translation_provider.dart';
@@ -22,12 +24,19 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
     with SingleTickerProviderStateMixin {
   final TextEditingController messageController = TextEditingController();
   late stt.SpeechToText _speech;
-  bool _isListening = false;
+
+  // bool _isListening = false;
+  bool get _isListening =>
+      widget.translationProvider.activeMic ==
+      (widget.isHost ? ActiveMic.host : ActiveMic.guest);
+
   String _lastWords = "";
   bool _speechEnabled = false;
   late AnimationController _micAnimationController;
   late Animation<double> _micAnimation;
   bool _hasInternet = true;
+  Timer? _internetCheckTimer;
+
   @override
   void initState() {
     super.initState();
@@ -49,7 +58,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
             print("Speech error: $error");
 
             if (error.errorMsg.contains("network")) {
-              showError(context,"⚠️ Internet required for speech");
+              showError(context, "⚠️ Internet required for speech");
               _stopListening();
               return;
             }
@@ -71,6 +80,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
     _hasInternet = await hasInternet();
     setState(() {});
   }
+
   void _onSpeechStatus(String status) {
     /// Android timeout (~10 sec)
     if (status == "done" && _isListening) {
@@ -130,16 +140,20 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
   void _startListening() async {
     widget.translationProvider.setSpeechLanguage(widget.isHost);
 
+    // 🔥 STOP TTS (fix crash)
+    await widget.translationProvider.stop();
+    await Future.delayed(const Duration(milliseconds: 300));
+
     // 🔴 INTERNET CHECK
     final internet = await hasInternet();
 
     if (!internet) {
-      showError(context,"⚠️ No internet connection");
+      showError(context, "⚠️ No internet connection");
       return;
     }
 
     if (!_speech.isAvailable) {
-      showError(context,"⚠️ Speech not available");
+      showError(context, "⚠️ Speech not available");
       return;
     }
     // if (!_speech.isAvailable) {
@@ -150,12 +164,16 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
       _lastWords = messageController.text; // ✅ keep existing text
     }
 
-    setState(() => _isListening = true);
+    // setState(() => _isListening = true);
     _micAnimationController.repeat(reverse: true);
     _speech.listen(
       onResult: (val) {
         if (!_isListening) return;
 
+        final text = val.recognizedWords;
+
+        /// 🔥 ALWAYS SHOW LIVE TEXT
+        widget.translationProvider.updateLiveText(text, isHost: widget.isHost);
         if (val.finalResult) {
           /// append only final confirmed words
           _lastWords = "$_lastWords ${val.recognizedWords}".trim();
@@ -190,10 +208,31 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
                 .translationProvider
                 .guestLanguage],
     );
+
+    /// 🔥🔥 ADD TIMER HERE (IMPORTANT)
+    _internetCheckTimer?.cancel(); // avoid duplicates
+
+    _internetCheckTimer = Timer.periodic(const Duration(seconds: 2), (
+      timer,
+    ) async {
+      if (!_isListening) {
+        timer.cancel();
+        return;
+      }
+
+      final internet = await hasInternet();
+
+      if (!internet) {
+        showError(context, "⚠️ Internet lost");
+        _forceStopMic();
+        timer.cancel();
+      }
+    });
   }
 
   void _stopListening() {
-    setState(() => _isListening = false);
+    // setState(() => _isListening = false);
+    _internetCheckTimer?.cancel();
     _micAnimationController.stop();
     _micAnimationController.reset();
     _speech.stop();
@@ -205,7 +244,7 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
     final internet = await hasInternet();
 
     if (!internet) {
-      showError(context,"⚠️ No internet. Cannot translate.");
+      showError(context, "⚠️ No internet. Cannot translate.");
       return;
     }
 
@@ -228,70 +267,32 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: 550),
-        child: Container(
-          width: 550, // Given 550 so that it will look good on web also.
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-          decoration: BoxDecoration(
-            color: Theme.of(context).secondaryHeaderColor,
-            borderRadius: BorderRadius.circular(40),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.15),
-                blurRadius: 10,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: messageController,
-                  onChanged: widget.translationProvider.setInputText,
-                  style: const TextStyle(color: Colors.grey),
-                  decoration: InputDecoration(
-                    hintText: "Type a message...",
-                    hintStyle: const TextStyle(color: Colors.grey),
-                    filled: true,
-                    // fillColor: const Color(0xFF2C2C2C),
-                    fillColor: Theme.of(context).cardColor,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                  textInputAction: TextInputAction.send,
-                  onSubmitted: (value) {
-                    if (value.trim().isNotEmpty) {
-                      _sendMessage();
-                    }
-                  },
-                ),
-              ),
-              const SizedBox(width: 5),
-              _buildSendButton(), // SEND BUTTON
-              const SizedBox(width: 5),
-              _buildMicButton(), // MIC BUTTON
-            ],
-          ),
-        ),
-      ),
-    );
+    return Center(child: _buildMicButton(widget.isHost));
   }
 
   @override
   void dispose() {
+    _internetCheckTimer?.cancel();
     _speech.stop();
     _micAnimationController.dispose();
     messageController.dispose();
     super.dispose();
+  }
+
+  void _forceStopMic() async {
+    final provider = widget.translationProvider;
+
+    await _speech.stop();
+
+    _internetCheckTimer?.cancel(); // 🔥 MUST
+
+    provider.stopMic();
+    provider.updateLiveText("", isHost: widget.isHost);
+
+    _micAnimationController.stop();
+    _micAnimationController.reset();
+
+    setState(() {});
   }
 
   Widget _buildSendButton() {
@@ -304,44 +305,127 @@ class _ChatInputWidgetState extends State<ChatInputWidget>
       child: IconButton(
         icon: const Icon(Icons.send, color: Colors.white),
         onPressed: !_hasInternet
-            ? () => showError(context,"No internet")
-            :_sendMessage,
+            ? () => showError(context, "No internet")
+            : _sendMessage,
       ),
     );
   }
 
-  Widget _buildMicButton() {
-    return GestureDetector(
-      onTap: !_hasInternet
-          ? () => showError(context,"No internet")
-          : () {
-        if (_isListening) {
-          _stopListening();
-        } else {
-          _startListening();
-        }
+  Widget _buildMicButton(bool isHost) {
+    return AnimatedBuilder(
+      animation: _micAnimationController,
+      builder: (context, child) {
+        return Center(
+          child: Column(
+            children: [
+              if (isHost)
+                Transform.rotate(
+                  angle: 3.1416,
+                  child: Text(
+                    // "Gastmikrofon eingeschaltet",
+                    "",
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              if (!isHost) SizedBox(height: 20),
+              Row(
+                children: [
+                  Transform.rotate(
+                    angle: isHost ? 3.1416 : 0,
+                    child: circleButton(
+                      50,
+                      50,
+                      _isListening
+                          ? "assets/images/mic_on.gif"
+                          : "assets/images/mic_off.svg",
+                      onTap: () async {
+                        final internet = await hasInternet();
+
+                        if (!internet) {
+                          showError(context, "No internet available");
+                          return;
+                        }
+
+                        final provider = widget.translationProvider;
+
+                        final requestedMic = widget.isHost
+                            ? ActiveMic.host
+                            : ActiveMic.guest;
+
+                        final isSameMic = provider.activeMic == requestedMic;
+
+                        await provider.stop();
+                        await _speech.stop();
+
+                        await Future.delayed(const Duration(milliseconds: 300));
+
+                        if (isSameMic) {
+                          provider.stopMic();
+                          _stopListening();
+                          await _sendMessage();
+                        } else {
+                          _resetForNewMic();
+                          provider.setActiveMic(requestedMic);
+                          _startListening();
+                        }
+                      },
+                      // onTap: !_hasInternet
+                      //     ? () => showError(context, "No internet available")
+                      //     : () async {
+                      //   final provider = widget.translationProvider;
+                      //
+                      //   final requestedMic =
+                      //   widget.isHost ? ActiveMic.host : ActiveMic.guest;
+                      //
+                      //   final isSameMic = provider.activeMic == requestedMic;
+                      //
+                      //   await provider.stop();
+                      //   await _speech.stop();
+                      //
+                      //   await Future.delayed(const Duration(milliseconds: 300));
+                      //
+                      //   if (isSameMic) {
+                      //     provider.stopMic();
+                      //     _stopListening();
+                      //     await _sendMessage();
+                      //   } else {
+                      //     _resetForNewMic();
+                      //     provider.setActiveMic(requestedMic);
+                      //     _startListening();
+                      //   }
+                      // },
+                    ),
+                  ),
+                ],
+              ),
+              if (isHost) SizedBox(height: 20),
+              if (!isHost)
+                Text(
+                  // "Host Mic Off",
+                  "",
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.black,
+                  ),
+                ),
+            ],
+          ),
+        );
       },
-      child: AnimatedBuilder(
-        animation: _micAnimationController,
-        builder: (context, child) {
-          return Transform.scale(
-            scale: _isListening ? _micAnimation.value : 1,
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: _isListening
-                    ? Theme.of(context).primaryColor
-                    : Colors.transparent,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                _isListening ? Icons.mic : Icons.mic_none,
-                color: Colors.white,
-              ),
-            ),
-          );
-        },
-      ),
     );
+  }
+
+  void _resetForNewMic() {
+    _lastWords = "";
+
+    messageController.clear();
+
+    widget.translationProvider.setInputText("");
+    widget.translationProvider.updateLiveText("", isHost: widget.isHost);
   }
 }

@@ -1,18 +1,32 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:http/http.dart' as http;
-import 'package:ollama_dart/ollama_dart.dart';
-
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+import '../util/model/message_model.dart';
 
 enum TranslationStatus { idle, loading, success, error }
 
+enum ActiveMic { none, host, guest }
+
 class TranslationProvider extends ChangeNotifier {
-  // final List<String> languages = ["English", "Hindi", "German"];
-  final List<String> languages = ["English", "Hindi", "German","Spanish",
-    "French","Dutch","Russian","Portuguese","Japanese"];
+  /// 🌍 Languages
+  final List<String> languages = [
+    "English",
+    "Hindi",
+    "German",
+    "Spanish",
+    "French",
+    "Dutch",
+    "Russian",
+    "Portuguese",
+    "Japanese",
+  ];
+
   final Map<String, String> languageCodes = {
     "English": "en",
     "Hindi": "hi",
@@ -22,9 +36,118 @@ class TranslationProvider extends ChangeNotifier {
     "Dutch": "nl",
     "Russian": "ru",
     "Portuguese": "pt",
-    "Japanese": "ja"
+    "Japanese": "ja",
   };
 
+  /// 🔥 NEW STATE (IMPORTANT)
+  List<Message> messages = [];
+  String liveText = "";
+  bool isHostSpeaking = true;
+  bool isTranslating = false;
+
+  /// 🔤 Languages
+  String _hostLanguage = "German";
+  String _guestLanguage = "English";
+
+  String _sourceLanguage = "";
+  String _targetLanguage = "";
+
+  String _translatedText = "";
+  String _inputText = "";
+
+  String _errorMessage = "";
+  TranslationStatus _status = TranslationStatus.idle;
+
+  /// 🔊 TTS
+  final FlutterTts flutterTts = FlutterTts();
+  bool isSpeaking = false;
+
+  double volume = 0.5;
+  double pitch = 0.5;
+  double rate = 0.5;
+
+  bool isListening = false;
+  ActiveMic activeMic = ActiveMic.none;
+
+  void setActiveMic(ActiveMic mic) {
+    activeMic = mic;
+    notifyListeners();
+  }
+
+  void stopMic() {
+    activeMic = ActiveMic.none;
+    notifyListeners();
+  }
+
+  void setVolume(double v) {
+    volume = v.clamp(0.1, 1.0);
+    volume = v;
+    notifyListeners();
+  }
+
+  void setPitch(double v) {
+    pitch = v;
+    notifyListeners();
+  }
+
+  void setRate(double v) {
+    rate = v;
+    notifyListeners();
+  }
+
+  Future<void> switchMic(bool isHost, stt.SpeechToText speech) async {
+    ActiveMic requestedMic = isHost ? ActiveMic.host : ActiveMic.guest;
+
+    // 🔥 Stop everything first (IMPORTANT)
+    await stop();
+
+    await speech.stop();
+
+    // small delay for iOS stability
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    // 👉 if same mic → just stop
+    if (activeMic == requestedMic && isListening) {
+      activeMic = ActiveMic.none;
+      isListening = false;
+      notifyListeners();
+      return;
+    }
+
+    // 👉 switch mic
+    activeMic = requestedMic;
+    isListening = true;
+
+    notifyListeners();
+  }
+
+  TranslationProvider() {
+    flutterTts.setCompletionHandler(() {
+      isSpeaking = false;
+      notifyListeners();
+    });
+
+    flutterTts.setCancelHandler(() {
+      isSpeaking = false;
+      notifyListeners();
+    });
+  }
+
+  /// GETTERS
+  String get hostLanguage => _hostLanguage;
+  String get guestLanguage => _guestLanguage;
+  String get translatedText => _translatedText;
+  String get inputText => _inputText;
+  String get errorMessage => _errorMessage;
+  TranslationStatus get status => _status;
+
+  bool get isLoading => _status == TranslationStatus.loading;
+  bool get hasError => _status == TranslationStatus.error;
+  late String _speechLanguage = _guestLanguage;
+
+  String get speechLanguage => _speechLanguage;
+
+  /// 🌍 Default language
   String getLanguageFromLocale(Locale locale) {
     switch (locale.languageCode) {
       case 'hi':
@@ -56,43 +179,7 @@ class TranslationProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  final client = OllamaClient(
-      config: OllamaConfig(
-          baseUrl: "http://192.168.2.37:11434"
-      )
-  );
-  // final client = OllamaClient(baseUrl: "http://192.168.0.106:11434/api");
-  // final ai_model = "llama3.2";
-  final aiModel = "translategemma:latest";
-
-  String _hostLanguage = "German";
-  String _guestLanguage = "English";
-
-  String _sourceLanguage = "";
-  String _targetLanguage = "";
-
-  late String _speechLanguage = _guestLanguage;
-
-  String _translatedText = "";
-  String _inputText = "";
-
-  String get hostLanguage => _hostLanguage;
-  String get guestLanguage => _guestLanguage;
-  String get speechLanguage => _speechLanguage;
-  String get translatedText => _translatedText;
-  String get inputText => _inputText;
-
-  String _errorMessage = "";
-  TranslationStatus _status = TranslationStatus.idle;
-
-  String get errorMessage => _errorMessage;
-  TranslationStatus get status => _status;
-
-  bool get isLoading => _status == TranslationStatus.loading;
-  bool get hasError => _status == TranslationStatus.error;
-
-
-
+  /// 🔄 Language setters
   void setSourceLanguage(String value) {
     _hostLanguage = value;
     notifyListeners();
@@ -103,18 +190,28 @@ class TranslationProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// 🔥 IMPORTANT (who is speaking)
   void setSpeechLanguage(bool isHost) {
+    print("isHost : $isHost");
     _speechLanguage = isHost ? guestLanguage : hostLanguage;
 
-    if(isHost) {
-      _sourceLanguage = hostLanguage;
-      _targetLanguage = guestLanguage;
-    }
-    else {
-      _sourceLanguage = guestLanguage;
-      _targetLanguage = hostLanguage;
+    isHostSpeaking = isHost;
+
+    if (isHost) {
+      _sourceLanguage = _hostLanguage;
+      _targetLanguage = _guestLanguage;
+    } else {
+      _sourceLanguage = _guestLanguage;
+      _targetLanguage = _hostLanguage;
     }
 
+    notifyListeners();
+  }
+
+  /// 🔥 LIVE TEXT (speech)
+  void updateLiveText(String text, {required bool isHost}) {
+    liveText = text;
+    isHostSpeaking = isHost;
     notifyListeners();
   }
 
@@ -123,24 +220,7 @@ class TranslationProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Future<void> translate() async {
-  //   print("Translation started for = $_inputText");
-  //
-  //   final generated = await client.chat.create(
-  //       request: ChatRequest(
-  //           model: aiModel,
-  //           messages: [
-  //             ChatMessage.system("You are a translation assistant. You can translate text from one language to another. Do not give explaination of translation. You need to just translate the exact text to required language in casual language."),
-  //             ChatMessage.user("Translate from ${_sourceLanguage} to $_targetLanguage: $_inputText")
-  //           ]
-  //       )
-  //   );
-  //
-  //   _translatedText = generated.message?.content ?? "";
-  //   print("translated text = $_translatedText");
-  //
-  //   notifyListeners();
-  // }
+  /// 🚀 TRANSLATE (UPDATED)
   Future<void> translate() async {
     if (_inputText.isEmpty) {
       _errorMessage = "⚠️ Please enter text";
@@ -148,31 +228,30 @@ class TranslationProvider extends ChangeNotifier {
       notifyListeners();
       return;
     }
+    isTranslating = true;
+    notifyListeners();
 
     _status = TranslationStatus.loading;
     _errorMessage = "";
     notifyListeners();
 
     final url = Uri.parse(
-      "https://simpra.azurewebsites.net/Translation/Translate"
+      "https://simpra.azurewebsites.net/Translation/Translate",
     );
 
     try {
       final response = await http
           .post(
-        url,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: jsonEncode({
-          "fromLanguage": languageCodes[_sourceLanguage],
-          "toLanguage": languageCodes[_targetLanguage],
-          "textToBeTranslate": _inputText,
-        }),
-      )
+            url,
+            headers: {"Content-Type": "application/json"},
+            body: jsonEncode({
+              "fromLanguage": languageCodes[_sourceLanguage],
+              "toLanguage": languageCodes[_targetLanguage],
+              "textToBeTranslate": _inputText,
+            }),
+          )
           .timeout(const Duration(seconds: 10));
 
-      // ✅ SUCCESS
       if (response.statusCode == 200) {
         try {
           final data = jsonDecode(response.body);
@@ -180,8 +259,28 @@ class TranslationProvider extends ChangeNotifier {
           if (data is List &&
               data.isNotEmpty &&
               data[0]["translations"] != null) {
-            _translatedText =
-                data[0]["translations"][0]["text"].toString();
+            isTranslating = false;
+            notifyListeners();
+
+            _translatedText = data[0]["translations"][0]["text"].toString();
+
+            /// 🔥 ADD MESSAGE TO HISTORY
+            messages.add(
+              Message(
+                originalText: _inputText,
+                translatedText: _translatedText,
+                isHost: isHostSpeaking,
+              ),
+            );
+
+            // Speaking the translated text
+            speak(_translatedText);
+
+            /// 🔥 NOW CLEAR LIVE TEXT
+            liveText = "";
+
+            /// 🔥 CLEAR LIVE TEXT
+            liveText = "";
 
             _status = TranslationStatus.success;
           } else {
@@ -192,42 +291,33 @@ class TranslationProvider extends ChangeNotifier {
           _status = TranslationStatus.error;
         }
       }
-
       // ❌ CLIENT ERROR (400–499)
-      else if (response.statusCode >= 400 &&
-          response.statusCode < 500) {
-        _errorMessage =
-        "⚠️ Request error (${response.statusCode})";
+      else if (response.statusCode >= 400 && response.statusCode < 500) {
+        _errorMessage = "⚠️ Request error (${response.statusCode})";
         _status = TranslationStatus.error;
       }
-
       // ❌ SERVER ERROR (500+)
       else {
         _errorMessage = "⚠️ Server error. Try again later.";
         _status = TranslationStatus.error;
       }
     }
-
     // ⏱ TIMEOUT
     on TimeoutException {
       _errorMessage = "⚠️ Request timed out";
       _status = TranslationStatus.error;
     }
-
     // 🌐 NO INTERNET
     on SocketException {
       _errorMessage = "⚠️ No internet connection";
       _status = TranslationStatus.error;
     }
-
     // 🌍 FLUTTER WEB (CORS / blocked)
     on http.ClientException catch (e) {
-      _errorMessage =
-      "⚠️ Network error (CORS / blocked request)";
+      _errorMessage = "⚠️ Network error (CORS / blocked request)";
       _status = TranslationStatus.error;
       print("ClientException: $e");
     }
-
     // ❌ UNKNOWN ERROR
     catch (e) {
       _errorMessage = "⚠️ Something went wrong";
@@ -237,77 +327,54 @@ class TranslationProvider extends ChangeNotifier {
 
     notifyListeners();
   }
-  // Future<void> translate() async {
-  //   print("Translation started for = $_inputText");
-  //
-  //   final url = Uri.parse(
-  //     "https://simpra.azurewebsites.net/Translation/Translate"
-  //   );
-  //   try {
-  //     final response = await http.post(
-  //       url,
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: jsonEncode({
-  //         "fromLanguage": languageCodes[_sourceLanguage],
-  //         "toLanguage": languageCodes[_targetLanguage],
-  //         "textToBeTranslate": _inputText
-  //       },)
-  //     );
-  //
-  //     if (response.statusCode == 200) {
-  //       final data = jsonDecode(response.body);
-  //
-  //       _translatedText =
-  //           data[0]["translations"][0]["text"].toString();
-  //
-  //       print("translated text = $_translatedText");
-  //     } else {
-  //       print("Error: ${response.statusCode}");
-  //       print("Body: ${response.body}");
-  //     }
-  //   } catch (e) {
-  //     print("Translation error: $e");
-  //   }
-  //
-  //   notifyListeners();
-  // }
-
-  final FlutterTts flutterTts = FlutterTts();
-  bool isSpeaking = false;
-
-  TranslationProvider() {
-    flutterTts.setCompletionHandler(() {
-      isSpeaking = false;
-      notifyListeners();
-    });
-
-    flutterTts.setCancelHandler(() {
-      isSpeaking = false;
-      notifyListeners();
-    });
-  }
-
 
   Future<void> speak(String text) async {
     if (text.isEmpty) return;
 
-    await flutterTts.setLanguage( languageCodes[_speechLanguage] ?? 'en'); // change if needed
-    await flutterTts.setPitch(1.0);
-    await flutterTts.setSpeechRate(0.5);
+    await flutterTts.setLanguage(languageCodes[_speechLanguage] ?? 'en');
+
+    await flutterTts.setVolume(volume.clamp(0.1, 1.0));
+    await flutterTts.setPitch(0.5 + (pitch * 1.5));
+
+    double speechRate;
+
+    if (kIsWeb) {
+      speechRate = 0.3 + (rate * 0.4);
+    } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+      speechRate = 0.2 + (rate * 0.3);
+    } else {
+      speechRate = 0.3 + (rate * 0.4);
+    }
+
+    await flutterTts.setSpeechRate(speechRate);
+
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
+      await flutterTts.setIosAudioCategory(
+        IosTextToSpeechAudioCategory.playback,
+        [IosTextToSpeechAudioCategoryOptions.mixWithOthers],
+      );
+    }
 
     isSpeaking = true;
     notifyListeners();
 
     await flutterTts.speak(text);
+
+    flutterTts.setCompletionHandler(() {
+      isSpeaking = false;
+      notifyListeners();
+    });
   }
 
   Future<void> stop() async {
     await flutterTts.stop();
-
     isSpeaking = false;
     notifyListeners();
   }
-}
 
+  @override
+  void dispose() {
+    messages.clear();
+    super.dispose();
+  }
+}
